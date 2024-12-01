@@ -1,4 +1,4 @@
-package com.ykim.mememaster.presentation.util
+package com.ykim.mememaster.presentation.home
 
 import com.ykim.mememaster.R
 
