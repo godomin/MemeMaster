@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.rememberNavController
+import com.ykim.mememaster.presentation.navigation.NavigationRoot
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,7 +18,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MemeMasterTheme {
-
+                val navController = rememberNavController()
+                NavigationRoot(navController = navController)
             }
         }
     }

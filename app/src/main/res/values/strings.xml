@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MemeMaster</string>
+    <string name="home_title">Your memes</string>
+    <string name="favorites_first">Favorites first</string>
+    <string name="newest_first">Newest first</string>
+    <string name="empty_home_description">Tap + button to create your first meme</string>
 </resources>
