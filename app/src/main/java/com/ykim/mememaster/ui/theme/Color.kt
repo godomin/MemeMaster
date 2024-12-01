@@ -13,7 +13,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val SurfaceContainerLowest = Color(0xFF0F0D13)
 val SurfaceContainerLow = Color(0xFF1D1B20)
-val SurfaceContainer = Color(0xFF1D1B20)
+val SurfaceContainer = Color(0xFF211F26)
 val SurfaceContainerHighDark = Color(0xFF2B2930)
 val SurfaceDim = Color(0xFF141218)
 val Outline = Color(0xFF79747E)

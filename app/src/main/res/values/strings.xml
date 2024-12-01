@@ -12,4 +12,11 @@
         <item quantity="one">%1$d template</item>
         <item quantity="other">%1$d templates</item>
     </plurals>
+    <plurals name="delete_meme_title">
+        <item quantity="one">Delete %1$d meme?</item>
+        <item quantity="other">Delete %1$d memes?</item>
+    </plurals>
+    <string name="delete_meme_description">You will not be able to restore them. If you\'re fine with that, press Delete.</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
 </resources>

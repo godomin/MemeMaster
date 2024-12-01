@@ -15,18 +15,23 @@ import androidx.compose.ui.unit.dp
 fun MemeIcon(
     icon: ImageVector,
     onClick: () -> Unit,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .size(44.dp)
-            .clickable(onClick = onClick),
+            .clickable(
+                enabled = enabled,
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = "",
             tint = MaterialTheme.colorScheme.primaryContainer
+                .copy(alpha = if (enabled) 1f else 0.5f)
         )
     }
 }

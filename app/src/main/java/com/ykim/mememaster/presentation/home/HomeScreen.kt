@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.ykim.mememaster.R
+import com.ykim.mememaster.presentation.components.MemeDialog
 import com.ykim.mememaster.presentation.components.MemeDropdownMenu
 import com.ykim.mememaster.presentation.components.MemeFloatingActionButton
 import com.ykim.mememaster.presentation.components.MemeIcon
@@ -76,6 +77,9 @@ private fun HomeScreen(
     onAction: (HomeAction) -> Unit
 ) {
     var showBottomSheet by remember {
+        mutableStateOf(false)
+    }
+    var showDeleteConfirmDialog by remember {
         mutableStateOf(false)
     }
     Scaffold(
@@ -143,7 +147,8 @@ private fun HomeScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             MemeIcon(
                                 icon = Icons.Default.Delete,
-                                onClick = { onAction(HomeAction.OnDeleteSelectedItem) }
+                                onClick = { showDeleteConfirmDialog = true },
+                                enabled = state.list.any { it.isSelected }
                             )
                         }
                     }
@@ -277,6 +282,24 @@ private fun HomeScreen(
                         angle = 270f,
                         colorStops = colorStops
                     )
+                )
+            }
+            if (showDeleteConfirmDialog) {
+                val selectedCount = state.list.count { it.isSelected }
+                MemeDialog(
+                    title = pluralStringResource(
+                        R.plurals.delete_meme_title,
+                        selectedCount,
+                        selectedCount
+                    ),
+                    description = stringResource(id = R.string.delete_meme_description),
+                    confirmText = stringResource(id = R.string.delete),
+                    dismissText = stringResource(id = R.string.cancel),
+                    onConfirm = {
+                        onAction(HomeAction.OnDeleteSelectedItem)
+                        showDeleteConfirmDialog = false
+                    },
+                    onDismiss = { showDeleteConfirmDialog = false }
                 )
             }
         }
