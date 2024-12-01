@@ -104,7 +104,7 @@ fun MemeSquareItem(
             )
     ) {
         Image(
-            painter = rememberAsyncImagePainter(model = item.uri),
+            painter = rememberAsyncImagePainter(model),
             contentDescription = "",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
