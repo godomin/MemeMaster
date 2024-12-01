@@ -20,4 +20,6 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="new_meme">New meme</string>
+    <string name="add_text">Add text</string>
+    <string name="save_meme">Save meme</string>
 </resources>
