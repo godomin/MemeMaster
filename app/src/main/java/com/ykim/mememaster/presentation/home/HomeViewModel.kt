@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ykim.mememaster.presentation.model.Meme
+import com.ykim.mememaster.presentation.util.getSearchResult
 import com.ykim.mememaster.presentation.util.sortByFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,21 +29,23 @@ class HomeViewModel @Inject constructor(
 
     init {
         // TODO: load from repo
+        val list = mutableListOf<Meme>()
+        (0..9).forEach {
+            list += Meme(
+                uri = "$it",
+                isFavorite = false,
+                isSelected = false,
+                timestamp = 0L
+            )
+        }
         state = state.copy(
-            list = listOf(
-                Meme(
-                    uri = "",
-                    isFavorite = true,
-                    isSelected = true,
-                    timestamp = 0L
-                )
-            ).sortByFilter(state.filter)
+            list = list.sortByFilter(state.filter),
+            resultList = getSearchResult(state.searchQuery)
         )
     }
 
     fun onAction(action: HomeAction) {
         when (action) {
-            HomeAction.OnCreateClicked -> {}
             is HomeAction.OnFilterChanged -> onFilterChanged(action.filter)
 
             HomeAction.OnCancelSelect -> onCancelSelected()
@@ -57,6 +60,12 @@ class HomeViewModel @Inject constructor(
             is HomeAction.OnItemLongPressed -> onItemLongPressed(action.item)
             HomeAction.OnDeleteSelectedItem -> deleteSelectedItems()
             HomeAction.OnShareSelectedItem -> shareSelectedItems()
+
+            is HomeAction.OnSearchQueryChanged -> onQueryChanged(action.query)
+
+            HomeAction.OnEditModeChanged -> {
+                state = state.copy(isEditMode = !state.isEditMode)
+            }
         }
     }
 
@@ -120,5 +129,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             eventChannel.send(HomeEvent.StartShareChooser(ArrayList(uriList)))
         }
+    }
+
+    private fun onQueryChanged(query: String) {
+        state = state.copy(
+            resultList = getSearchResult(query = query),
+            searchQuery = query
+        )
     }
 }

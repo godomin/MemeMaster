@@ -1,5 +1,6 @@
 package com.ykim.mememaster.presentation.components
 
+import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,8 +41,13 @@ fun MemeSquareItemExtended(
     modifier: Modifier = Modifier
 ) {
     MemeSquareItem(
-        item = item,
+        model = Uri.parse(item.uri),
         modifier = modifier,
+        onClick = if (mode == ItemMode.SELECT) {
+            onIconClicked
+        } else {
+            {}
+        },
         onLongPress = onLongPress
     ) {
         val angle = if (mode == ItemMode.FAVORITE) -30f else 30f
@@ -81,11 +88,11 @@ fun MemeSquareItemExtended(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MemeSquareItem(
-    item: Meme,
+    model: Any,
     onClick: () -> Unit = {},
     onLongPress: () -> Unit = {},
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable BoxScope.() -> Unit = {}
 ) {
     Box(
         modifier = modifier

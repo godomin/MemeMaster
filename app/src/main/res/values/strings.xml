@@ -4,4 +4,12 @@
     <string name="favorites_first">Favorites first</string>
     <string name="newest_first">Newest first</string>
     <string name="empty_home_description">Tap + button to create your first meme</string>
+    <string name="search_hint">Search input</string>
+    <string name="choose_template_title">Choose template</string>
+    <string name="choose_template_description">Choose template for your next meme masterpiece</string>
+    <plurals name="result_template_count">
+        <item quantity="zero">No memes found :(</item>
+        <item quantity="one">%1$d template</item>
+        <item quantity="other">%1$d templates</item>
+    </plurals>
 </resources>
