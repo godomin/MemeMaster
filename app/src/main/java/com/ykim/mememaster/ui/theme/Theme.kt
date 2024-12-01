@@ -23,6 +23,7 @@ private val LightColorScheme = lightColorScheme(
     outline = Outline,
     error = Error,
     onPrimary = OnPrimaryFixed,
+    surfaceDim = SurfaceDim,
 )
 
 @Composable
