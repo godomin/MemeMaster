@@ -2,7 +2,9 @@ package com.ykim.mememaster.presentation.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,6 +38,7 @@ import androidx.navigation.NavController
 import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.components.MemeDropdownMenu
 import com.ykim.mememaster.presentation.components.MemeFloatingActionButton
+import com.ykim.mememaster.presentation.components.MemeSquareItemExtended
 import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
@@ -67,17 +79,72 @@ private fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = stringResource(id = R.string.home_title),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                )
-                MemeDropdownMenu(
-                    enabled = state.list.isNotEmpty(),
-                    selectedItem = state.filter,
-                    onItemClick = { onAction(HomeAction.OnFilterChanged(it)) }
-                )
+                if (state.mode == ItemMode.FAVORITE) {
+                    Text(
+                        text = stringResource(id = R.string.home_title),
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        ),
+                    )
+                    MemeDropdownMenu(
+                        enabled = state.list.isNotEmpty(),
+                        selectedItem = state.filter,
+                        onItemClick = { onAction(HomeAction.OnFilterChanged(it)) }
+                    )
+                } else if (state.mode == ItemMode.SELECT) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clickable { onAction(HomeAction.OnCancelSelect) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = state.list.filter { it.isSelected }.size.toString(),
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clickable { onAction(HomeAction.OnShareSelectedItem) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clickable { onAction(HomeAction.OnDeleteSelectedItem) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        }
+                    }
+                }
             }
             Column(
                 modifier = Modifier
@@ -100,7 +167,26 @@ private fun HomeScreen(
                         )
                     )
                 } else {
-
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(22.dp)
+                    ) {
+                        items(
+                            items = state.list,
+                            key = { it.uri }
+                        ) { item ->
+                            MemeSquareItemExtended(
+                                item = item,
+                                mode = state.mode,
+                                onIconClicked = { onAction(HomeAction.OnItemIconClicked(item)) },
+                                onLongPress = { onAction(HomeAction.OnItemLongPressed(item)) }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -114,14 +200,27 @@ private fun HomeScreenPreview() {
         HomeScreen(
             state = HomeState(
                 list = listOf(
-                    /* Meme(
-                         uri = "",
-                         isFavorite = true,
-                         isSelected = true,
-                         timestamp = 0L
-                     )*/
+                    Meme(
+                        uri = "1",
+                        isFavorite = true,
+                        isSelected = true,
+                        timestamp = 0L
+                    ),
+                    Meme(
+                        uri = "2",
+                        isFavorite = false,
+                        isSelected = false,
+                        timestamp = 0L
+                    ),
+                    Meme(
+                        uri = "3",
+                        isFavorite = false,
+                        isSelected = false,
+                        timestamp = 0L
+                    )
                 ),
-                filter = DropdownList.FAVORITE
+                filter = DropdownList.FAVORITE,
+                mode = ItemMode.SELECT
             ),
             onAction = {}
         )

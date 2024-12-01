@@ -12,8 +12,11 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
 
 ) : ViewModel() {
-    var state by mutableStateOf(
-        HomeState(
+    var state by mutableStateOf(HomeState())
+        private set
+
+    init {
+        state = state.copy(
             list = listOf(
                 Meme(
                     uri = "",
@@ -23,8 +26,7 @@ class HomeViewModel @Inject constructor(
                 )
             )
         )
-    )
-        private set
+    }
 
     fun onAction(action: HomeAction) {
         when (action) {
@@ -32,6 +34,53 @@ class HomeViewModel @Inject constructor(
             is HomeAction.OnFilterChanged -> {
                 state = state.copy(filter = action.filter)
             }
+
+            HomeAction.OnCancelSelect -> {
+                state = state.copy(mode = ItemMode.FAVORITE)
+            }
+
+            is HomeAction.OnItemIconClicked -> {
+                when (state.mode) {
+                    ItemMode.FAVORITE -> onFavoriteToggled(action.item)
+                    ItemMode.SELECT -> onItemSelected(action.item)
+                }
+            }
+
+            is HomeAction.OnItemLongPressed -> onItemLongPressed(action.item)
+            HomeAction.OnDeleteSelectedItem -> TODO()
+            HomeAction.OnShareSelectedItem -> TODO()
         }
+    }
+
+    private fun onFavoriteToggled(item: Meme) {
+        val newItem = item.copy(isFavorite = !item.isFavorite)
+        state = state.copy(
+            list = state.list.map {
+                if (it.uri == item.uri) {
+                    newItem
+                } else {
+                    it
+                }
+            }
+        )
+        // update to repo
+    }
+
+    private fun onItemSelected(item: Meme, forceSelect: Boolean = false) {
+        val newItem = item.copy(isSelected = !item.isSelected || forceSelect)
+        state = state.copy(
+            list = state.list.map {
+                if (it.uri == item.uri) {
+                    newItem
+                } else {
+                    it
+                }
+            }
+        )
+    }
+
+    private fun onItemLongPressed(item: Meme) {
+        onItemSelected(item, true)
+        state = state.copy(mode = ItemMode.SELECT)
     }
 }
