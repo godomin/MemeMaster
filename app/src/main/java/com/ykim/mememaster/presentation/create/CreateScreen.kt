@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,6 +46,7 @@ import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.components.MemeButton
 import com.ykim.mememaster.presentation.components.MemeIcon
 import com.ykim.mememaster.presentation.components.MemeOutlinedButton
+import com.ykim.mememaster.presentation.components.MemeSlider
 import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import com.ykim.mememaster.ui.theme.SurfaceContainerHighDark
@@ -189,15 +191,80 @@ private fun CreateScreen(
 
                         EditMode.SIZE -> {
                             Row(
-                                modifier = Modifier.fillMaxWidth()
-                                    .padding(16.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-
+                                Box(
+                                    modifier = Modifier.size(36.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Aa",
+                                        style = MaterialTheme.typography.headlineLarge.copy(
+                                            fontSize = 12.sp,
+                                            color = Color.White
+                                        )
+                                    )
+                                }
+                                MemeSlider(
+                                    value = state.selectedFontSize,
+                                    onValueChange = { onAction(CreateAction.OnTextFontSizeChanged(it)) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Box(
+                                    modifier = Modifier.size(36.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Aa",
+                                        style = MaterialTheme.typography.headlineLarge.copy(
+                                            color = Color.White
+                                        )
+                                    )
+                                }
                             }
                         }
 
                         EditMode.COLOR -> {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                LazyRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    items(
+                                        items = colorList
+                                    ) { color ->
+                                        Box(
+                                            modifier = when {
+                                                state.selectedColor == color -> Modifier
+                                                    .size(44.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color.White.copy(alpha = 0.2f))
 
+                                                else -> Modifier
+                                                    .size(44.dp)
+                                            },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(32.dp)
+                                                    .clip(CircleShape)
+                                                    .background(color)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
 
                         else -> {}
@@ -312,7 +379,7 @@ private fun CreateScreenScreenPreview() {
     MemeMasterTheme {
         CreateScreen(
             state = CreateState(
-                editMode = EditMode.SIZE
+                editMode = EditMode.COLOR
             ),
             onAction = {}
         )

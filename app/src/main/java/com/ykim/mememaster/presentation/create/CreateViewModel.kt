@@ -15,6 +15,13 @@ class CreateViewModel @Inject constructor(
         private set
 
     fun onAction(action: CreateAction) {
-
+        when (action) {
+            is CreateAction.OnTextFontChanged -> {
+                state = state.copy(selectedFont = action.font)
+            }
+            is CreateAction.OnTextFontSizeChanged -> {
+                state = state.copy(selectedFontSize = action.fontSize)
+            }
+        }
     }
 }
