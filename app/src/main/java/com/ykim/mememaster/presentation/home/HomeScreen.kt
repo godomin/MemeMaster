@@ -46,7 +46,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.components.MemeDialog
 import com.ykim.mememaster.presentation.components.MemeDropdownMenu
@@ -61,12 +60,21 @@ import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
 fun HomeScreenRoot(
-    navController: NavController,
+    onTemplateSelected: (Int) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
 ) {
     HomeScreen(
         state = viewModel.state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                is HomeAction.OnTemplateSelected -> {
+                    onTemplateSelected(action.templateResId)
+                }
+
+                else -> Unit
+            }
+            viewModel.onAction(action)
+        }
     )
 }
 
@@ -257,8 +265,12 @@ private fun HomeScreen(
                                     items = state.resultList,
                                     key = { it }
                                 ) { item ->
-                                    MemeSquareItem(model = item,
-                                        onClick = {}
+                                    MemeSquareItem(
+                                        model = item,
+                                        onClick = {
+                                            onAction(HomeAction.OnTemplateSelected(item))
+                                            showBottomSheet = false
+                                        }
                                     )
                                 }
                             }

@@ -9,9 +9,13 @@ import com.ykim.mememaster.presentation.home.HomeScreenRoot
 
 @Composable
 fun NavigationRoot(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Create) {
+    NavHost(navController = navController, startDestination = Home) {
         composable<Home> {
-            HomeScreenRoot(navController = navController)
+            HomeScreenRoot(
+                onTemplateSelected = { templateResId ->
+                    navController.navigate(Create(templateResId))
+                }
+            )
         }
         composable<Create> {
             CreateScreenRoot(

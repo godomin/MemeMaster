@@ -5,7 +5,8 @@ import androidx.compose.ui.unit.sp
 import com.ykim.mememaster.presentation.util.MemeText
 
 data class CreateState(
-    val editMode: EditMode = EditMode.SIZE,
+    val templateResId: Int = 0,
+    val editMode: EditMode = EditMode.ADD,
     val selectedFont: MemeText = MemeText.STROKE,
     val selectedFontSize: Float = 40.sp.value,
     val selectedColor: Color = Color.White

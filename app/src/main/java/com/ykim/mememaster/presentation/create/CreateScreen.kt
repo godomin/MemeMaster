@@ -123,7 +123,7 @@ private fun CreateScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(R.drawable.template_06),
+                    painter = rememberAsyncImagePainter(state.templateResId),
                     contentDescription = "",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -133,7 +133,7 @@ private fun CreateScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(158.dp)
+                    .height(170.dp)
                     .background(MaterialTheme.colorScheme.surfaceContainerLowest),
             ) {
                 Box(modifier = Modifier.weight(1f))
