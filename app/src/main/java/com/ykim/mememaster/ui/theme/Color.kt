@@ -24,6 +24,7 @@ val PrimaryContainer = Color(0xFFEADDFF)
 val SurfaceContainerHigh = Color(0xFFECE6F0)
 val Error = Color(0xFFB3261E)
 val OnPrimaryFixed = Color(0xFF21005D)
+val InversePrimary = Color(0xFFD0BCFF)
 
 val PurpleLight1 = Color(0xFFEADDFF)
 val PurpleMedium1 = Color(0xFFD0BCFE)

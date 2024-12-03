@@ -24,6 +24,7 @@ private val LightColorScheme = lightColorScheme(
     error = Error,
     onPrimary = OnPrimaryFixed,
     surfaceDim = SurfaceDim,
+    inversePrimary = InversePrimary
 )
 
 @Composable
