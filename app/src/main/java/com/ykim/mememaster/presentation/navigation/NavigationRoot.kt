@@ -14,7 +14,11 @@ fun NavigationRoot(navController: NavHostController) {
             HomeScreenRoot(navController = navController)
         }
         composable<Create> {
-            CreateScreenRoot(navController = navController)
+            CreateScreenRoot(
+                onNavigateUp = {
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }

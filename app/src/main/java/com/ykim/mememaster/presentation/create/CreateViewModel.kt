@@ -16,12 +16,23 @@ class CreateViewModel @Inject constructor(
 
     fun onAction(action: CreateAction) {
         when (action) {
+            is CreateAction.OnEditModeChanged -> {
+                state = state.copy(editMode = action.editMode)
+            }
+
             is CreateAction.OnTextFontChanged -> {
                 state = state.copy(selectedFont = action.font)
             }
+
             is CreateAction.OnTextFontSizeChanged -> {
                 state = state.copy(selectedFontSize = action.fontSize)
             }
+
+            is CreateAction.OnTextColorChanged -> {
+                state = state.copy(selectedColor = action.color)
+            }
+
+            else -> Unit
         }
     }
 }
