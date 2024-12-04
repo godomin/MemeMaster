@@ -183,7 +183,7 @@ private fun CreateScreen(
                                 val listState = rememberLazyListState()
                                 LaunchedEffect(key1 = Unit) {
                                     val targetIndex =
-                                        fontList.map { it.data }.indexOf(state.selectedFont)
+                                        fontList.map { it.type }.indexOf(state.selectedFont)
                                     val middleOffset = listState.layoutInfo.viewportSize.width / 2
                                     listState.scrollToItem(
                                         index = targetIndex,
@@ -203,7 +203,7 @@ private fun CreateScreen(
                                     ) { memeFont ->
                                         Column(
                                             modifier = when {
-                                                state.selectedFont == memeFont.data -> Modifier
+                                                state.selectedFont == memeFont.type -> Modifier
                                                     .clip(RoundedCornerShape(8.dp))
                                                     .background(SurfaceContainerHighDark)
                                                     .padding(8.dp)
@@ -212,7 +212,7 @@ private fun CreateScreen(
                                                     .clickable {
                                                         onAction(
                                                             CreateAction.OnTextFontChanged(
-                                                                memeFont.data
+                                                                memeFont.type
                                                             )
                                                         )
                                                     }
@@ -221,10 +221,10 @@ private fun CreateScreen(
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.Center
                                         ) {
-                                            memeFont.data.getTextComposable(memeFont)
+                                            memeFont.type.getTextComposable(memeFont)
                                             Spacer(modifier = Modifier.height(10.dp))
                                             Text(
-                                                text = memeFont.data.getDisplayedName(),
+                                                text = memeFont.type.getDisplayedName(),
                                                 style = MaterialTheme.typography.bodySmall
                                                     .copy(
                                                         color = Color.White,

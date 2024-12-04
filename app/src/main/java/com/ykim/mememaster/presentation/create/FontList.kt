@@ -10,10 +10,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.ykim.mememaster.R
-import com.ykim.mememaster.presentation.util.MemeText
+import com.ykim.mememaster.presentation.util.MemeFontType
 
 data class MemeFont(
-    val data: MemeText,
+    val type: MemeFontType,
     val style: TextStyle
 )
 
@@ -25,20 +25,20 @@ private val defaultTextStyle = TextStyle(
 
 val fontList = listOf(
     MemeFont(
-        MemeText.IMPACT,
+        MemeFontType.IMPACT,
         defaultTextStyle.copy(
             fontFamily = FontFamily(Font(R.font.impact)),
         )
     ),
     MemeFont(
-        MemeText.STROKE,
+        MemeFontType.STROKE,
         defaultTextStyle.copy(
             fontFamily = FontFamily(Font(R.font.impact)),
             fontWeight = FontWeight.ExtraBold,
         )
     ),
     MemeFont(
-        MemeText.SHADOWED,
+        MemeFontType.SHADOWED,
         defaultTextStyle.copy(
             fontFamily = FontFamily(Font(R.font.impact)),
             shadow = Shadow(
@@ -48,19 +48,19 @@ val fontList = listOf(
         )
     ),
     MemeFont(
-        MemeText.ROBOTO,
+        MemeFontType.ROBOTO,
         defaultTextStyle.copy(
             fontFamily = FontFamily.SansSerif,
         )
     ),
     MemeFont(
-        MemeText.ROCKSTAR,
+        MemeFontType.ROCKSTAR,
         defaultTextStyle.copy(
             fontFamily = FontFamily(Font(R.font.rockstar_extra_bold)),
         )
     ),
     MemeFont(
-        MemeText.RAZOR_FACE,
+        MemeFontType.RAZOR_FACE,
         defaultTextStyle.copy(
             fontFamily = FontFamily(Font(R.font.razor_face_regular)),
         )

@@ -24,16 +24,15 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.ykim.mememaster.presentation.model.MemeTextEditorData
-import com.ykim.mememaster.presentation.util.MemeText
+import com.ykim.mememaster.presentation.model.MemeTextStyleData
+import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
 fun MemeTextEditor(
     isSelected: Boolean = true,
-    data: MemeTextEditorData,
+    data: MemeTextStyleData,
     value: String = "",
     onValueChange: (String) -> Unit = {},
     onDeleteClicked: () -> Unit = {},
@@ -55,19 +54,13 @@ fun MemeTextEditor(
                 },
                 value = value,
                 onValueChange = onValueChange,
-                textStyle = data.font.style.copy(
-                    fontSize = data.fontSize.sp,
-                    color = data.color,
-                    letterSpacing = 0.em
-                ),
+                textStyle = data.getTextStyle(),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.inversePrimary),
                 decorationBox = { innerTextField ->
                     innerTextField()
-                    if (data.font.data == MemeText.STROKE) {
-                        Text(text = value, style = data.font.style.copy(
+                    if (data.fontType == MemeFontType.STROKE) {
+                        Text(text = value, style = data.getTextStyle().copy(
                             color = Color.Black,
-                            fontSize = data.fontSize.sp,
-                            letterSpacing = 0.em,
                             drawStyle = Stroke(
                                 miter = 10f,
                                 width = data.fontSize / 10,
@@ -103,8 +96,10 @@ private fun MemeTextEditorPreview() {
     MemeMasterTheme {
         MemeTextEditor(
             isSelected = false,
-            data = MemeTextEditorData(
-                fontSize = 80.sp.value
+            data = MemeTextStyleData(
+                fontSize = 80.sp.value,
+                fontType = MemeFontType.STROKE,
+                color = Color.White
             ),
             value = "TAP TWICE TO EDIT"
         )

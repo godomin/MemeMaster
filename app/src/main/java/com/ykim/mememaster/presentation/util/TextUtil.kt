@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.ykim.mememaster.presentation.create.MemeFont
 
-enum class MemeText {
+enum class MemeFontType {
     IMPACT,
     STROKE,
     SHADOWED,
@@ -25,9 +25,9 @@ enum class MemeText {
 private const val displayText = "GOOD"
 
 @Composable
-fun MemeText.getTextComposable(fontData: MemeFont) {
+fun MemeFontType.getTextComposable(fontData: MemeFont) {
     when (this) {
-        MemeText.STROKE -> {
+        MemeFontType.STROKE -> {
             Box {
                 Text(text = displayText, style = fontData.style)
                 Text(text = displayText, style = fontData.style.copy(
