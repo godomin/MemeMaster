@@ -25,4 +25,5 @@
     <string name="leave_editor_title">Leave editor?</string>
     <string name="leave">Leave</string>
     <string name="leave_editor_description">You will lose your precious meme. If you\'re fine with that, press \'Leave\'.</string>
+    <string name="editor_default_text">TAP TWICE TO EDIT</string>
 </resources>
