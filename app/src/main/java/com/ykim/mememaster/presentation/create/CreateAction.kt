@@ -2,15 +2,16 @@ package com.ykim.mememaster.presentation.create
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntSize
 import com.ykim.mememaster.presentation.util.MemeFontType
 
 sealed interface CreateAction {
     data object OnNavigateUp : CreateAction
 
-    data class OnAddText(val offset: Offset) : CreateAction
+    data object OnAddText: CreateAction
     data object OnRemoveText : CreateAction
     data class OnTextChanged(val text: String) : CreateAction
-    data class OnTextOffsetChanged(val offset: Offset) : CreateAction
+    data class OnTextOffsetChanged(val imageSize: IntSize, val textSize: IntSize, val offset: Offset) : CreateAction
     data class OnSelectedTextChanged(val id: Long) : CreateAction
 
     data class OnEditModeChanged(val editMode: EditMode) : CreateAction

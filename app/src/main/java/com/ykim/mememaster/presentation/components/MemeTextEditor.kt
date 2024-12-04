@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
@@ -28,7 +30,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.ykim.mememaster.presentation.model.MemeTextStyleData
 import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
@@ -48,17 +49,20 @@ fun MemeTextEditor(
         val selectedPadding = if (isSelected) 10.dp else 0.dp
         Box(
             modifier = Modifier
-                .padding(top = selectedPadding, end = selectedPadding)
+                .padding(top = 10.dp, end = selectedPadding)
         ) {
             BasicTextField(
                 modifier = when {
                     isSelected -> Modifier
                         .clip(RoundedCornerShape(4.dp))
                         .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(4.dp))
-                        .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp)
                         .widthIn(min = 0.dp)
                         .width(IntrinsicSize.Min)
+                        .padding(start = 12.dp, end = 12.dp)
+                        .verticalScroll(rememberScrollState(), false)
+
                     else -> Modifier
+                        .padding(start = 12.dp, end = 22.dp)
                 },
                 enabled = isSelected,
                 value = value,
@@ -68,14 +72,16 @@ fun MemeTextEditor(
                 decorationBox = { innerTextField ->
                     innerTextField()
                     if (data.fontType == MemeFontType.STROKE) {
-                        Text(text = value, style = data.getTextStyle().copy(
-                            color = Color.Black,
-                            drawStyle = Stroke(
-                                miter = 10f,
-                                width = data.fontSize / 10,
-                                join = StrokeJoin.Round
+                        Text(
+                            text = value, style = data.getTextStyle().copy(
+                                color = Color.Black,
+                                drawStyle = Stroke(
+                                    miter = 10f,
+                                    width = data.fontSize / 10,
+                                    join = StrokeJoin.Round
+                                )
                             )
-                        ))
+                        )
                     }
                 }
             )
@@ -95,6 +101,12 @@ fun MemeTextEditor(
                     tint = Color.White
                 )
             }
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(20.dp)
+                    .align(Alignment.TopEnd)
+            )
         }
     }
 }
@@ -110,7 +122,7 @@ private fun MemeTextEditorPreview() {
                 fontType = MemeFontType.STROKE,
                 color = Color.White
             ),
-            value = ""
+            value = "TEST",
         )
     }
 }

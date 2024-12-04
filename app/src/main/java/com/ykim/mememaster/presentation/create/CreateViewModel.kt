@@ -4,7 +4,10 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -13,6 +16,7 @@ import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.model.MemeTextData
 import com.ykim.mememaster.presentation.navigation.Create
 import com.ykim.mememaster.presentation.util.MemeFontType
+import com.ykim.mememaster.presentation.util.dpToPx
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -38,7 +42,6 @@ class CreateViewModel @Inject constructor(
 
             is CreateAction.OnAddText -> {
                 val newText = MemeTextData(
-                    offset = action.offset,
                     text = context.getString(R.string.editor_default_text)
                 )
                 state = state.copy(
@@ -64,7 +67,13 @@ class CreateViewModel @Inject constructor(
                 state = state.copy(
                     textList = state.textList.map {
                         if (it.id == state.selectedTextId) {
-                            it.copy(offset = it.offset + action.offset)
+                            it.copy(
+                                offset = coercedOffset(
+                                    action.imageSize,
+                                    action.textSize,
+                                    it.offset + action.offset
+                                )
+                            )
                         } else {
                             it
                         }
@@ -132,5 +141,16 @@ class CreateViewModel @Inject constructor(
             selectedFontSize = 40.sp.value,
             selectedColor = Color.White
         )
+    }
+
+    private fun coercedOffset(imageSize: IntSize, textSize: IntSize, newOffset: Offset): Offset {
+        val padding = context.dpToPx(5f)
+        val left = (-imageSize.center.x + textSize.center.x - padding)
+        val right = (imageSize.center.x - textSize.center.x + padding)
+        val top = (-imageSize.center.y + textSize.center.y - padding)
+        val bottom = (imageSize.center.y - textSize.center.y + padding)
+        val coercedX = newOffset.x.coerceIn(left, right)
+        val coercedY = newOffset.y.coerceIn(top, bottom)
+        return Offset(coercedX, coercedY)
     }
 }

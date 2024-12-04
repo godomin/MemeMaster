@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -44,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -56,11 +56,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toOffset
-import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,6 +71,7 @@ import com.ykim.mememaster.presentation.components.MemeOutlinedButton
 import com.ykim.mememaster.presentation.components.MemeSlider
 import com.ykim.mememaster.presentation.components.MemeTextEditor
 import com.ykim.mememaster.presentation.util.draggable
+import com.ykim.mememaster.presentation.util.getImageSize
 import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.presentation.util.pxToDp
 import com.ykim.mememaster.presentation.util.rememberKeyboardVisibility
@@ -147,6 +145,7 @@ private fun CreateScreen(
                     ),
                     modifier = Modifier.align(Alignment.Center)
                 )
+                DimBackground(keyboardVisible = keyboardVisible)
             }
             Divider()
             Box(
@@ -159,9 +158,11 @@ private fun CreateScreen(
             ) {
                 val painter = rememberAsyncImagePainter(state.templateResId)
                 val imageState = painter.state
-                if (imageState is AsyncImagePainter.State.Success) {
-                    val bitmap = imageState.result.drawable.toBitmap().asImageBitmap()
-                    imageSize = IntSize(bitmap.width, bitmap.height)
+                LaunchedEffect(key1 = imageState is AsyncImagePainter.State.Success) {
+                    if (imageState is AsyncImagePainter.State.Success) {
+                        val bitmap = imageState.result.drawable.toBitmap().asImageBitmap()
+                        imageSize = getImageSize(imageSize, bitmap.width, bitmap.height)
+                    }
                 }
                 Image(
                     painter = painter,
@@ -171,28 +172,43 @@ private fun CreateScreen(
                         .fillMaxSize()
                         .onSizeChanged { imageSize = it }
                 )
-                state.textList.forEach { text ->
-                    val isSelected = state.selectedTextId == text.id
-                    val offsetX =
-                        pxToDp(text.offset.x - imageSize.width / 2) + if (isSelected) 5.dp else 0.dp
-                    val offsetY =
-                        pxToDp(text.offset.y - imageSize.height / 2) - if (isSelected) 5.dp else 0.dp
-                    MemeTextEditor(
-                        isSelected = isSelected,
-                        data = text.style,
-                        value = text.text,
-                        onValueChange = { onAction(CreateAction.OnTextChanged(it)) },
-                        onDeleteClicked = { onAction(CreateAction.OnRemoveText) },
-                        modifier = Modifier
-                            .offset(offsetX, offsetY)
-                            .draggable { delta ->
-                                onAction(CreateAction.OnTextOffsetChanged(delta))
-                            }
-                            .clickable { onAction(CreateAction.OnSelectedTextChanged(text.id)) }
-                            .zIndex(if (isSelected) 1f else 0f)
-                    )
+                Box(
+                    modifier = Modifier
+                        .size(pxToDp(imageSize.width.toFloat()), pxToDp(imageSize.height.toFloat()))
+                        .clipToBounds(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    state.textList.forEach { text ->
+                        val isSelected = state.selectedTextId == text.id
+                        var textSize by remember { mutableStateOf(IntSize.Zero) }
+                        val offsetX = pxToDp(text.offset.x) + 5.dp
+                        val offsetY = pxToDp(text.offset.y) - 5.dp
+                        MemeTextEditor(
+                            isSelected = isSelected,
+                            data = text.style,
+                            value = text.text,
+                            onValueChange = { onAction(CreateAction.OnTextChanged(it)) },
+                            onDeleteClicked = { onAction(CreateAction.OnRemoveText) },
+                            modifier = Modifier
+                                .offset(offsetX, offsetY)
+                                .onSizeChanged {
+                                    textSize = it
+                                }
+                                .draggable { delta ->
+                                    onAction(
+                                        CreateAction.OnTextOffsetChanged(
+                                            imageSize,
+                                            textSize,
+                                            delta
+                                        )
+                                    )
+                                }
+                                .clickable { onAction(CreateAction.OnSelectedTextChanged(text.id)) }
+                                .zIndex(if (isSelected && keyboardVisible) 1f else 0f)
+                        )
+                    }
+                    DimBackground(keyboardVisible)
                 }
-                DimBackground(keyboardVisible, screenSize)
             }
             Column(
                 modifier = Modifier
@@ -228,7 +244,7 @@ private fun CreateScreen(
                         }
                         MemeOutlinedButton(
                             text = stringResource(id = R.string.add_text),
-                            onClick = { onAction(CreateAction.OnAddText(imageSize.center.toOffset())) }
+                            onClick = { onAction(CreateAction.OnAddText) }
                         )
                         MemeButton(
                             text = stringResource(id = R.string.save_meme),
@@ -525,7 +541,6 @@ private fun ToolbarIcon(
 @Composable
 private fun DimBackground(
     keyboardVisible: Boolean,
-    screenSize: IntSize,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -533,8 +548,7 @@ private fun DimBackground(
         enter = fadeIn(animationSpec = tween(200)),
         exit = fadeOut(animationSpec = tween(200)),
         modifier = modifier
-            .requiredSize(screenSize.width.dp, screenSize.height.dp)
-            //.size(width = screenSize.width.dp, height = screenSize.height.dp)
+            .fillMaxSize()
     ) {
         Box(
             modifier = Modifier
