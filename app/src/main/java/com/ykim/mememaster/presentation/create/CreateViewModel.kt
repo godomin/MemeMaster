@@ -86,7 +86,8 @@ class CreateViewModel @Inject constructor(
                     stateToAddMode()
                 } else {
                     state = state.copy(
-                        selectedTextId = action.id
+                        selectedTextId = action.id,
+                        editMode = EditMode.NONE
                     )
                 }
             }

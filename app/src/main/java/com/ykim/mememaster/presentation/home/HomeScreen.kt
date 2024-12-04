@@ -94,7 +94,8 @@ private fun HomeScreen(
         floatingActionButton = {
             if (state.mode == ItemMode.FAVORITE) {
                 MemeFloatingActionButton(
-                    onClick = { showBottomSheet = true }
+                    onClick = { showBottomSheet = true },
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
         }
