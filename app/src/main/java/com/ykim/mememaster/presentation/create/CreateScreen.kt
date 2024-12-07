@@ -71,6 +71,7 @@ import com.ykim.mememaster.presentation.components.MemeIcon
 import com.ykim.mememaster.presentation.components.MemeOutlinedButton
 import com.ykim.mememaster.presentation.components.MemeSlider
 import com.ykim.mememaster.presentation.components.MemeTextEditor
+import com.ykim.mememaster.presentation.model.EditMode
 import com.ykim.mememaster.presentation.util.draggable
 import com.ykim.mememaster.presentation.util.getImageSize
 import com.ykim.mememaster.presentation.util.getTextComposable
@@ -182,17 +183,12 @@ private fun CreateScreen(
                 ) {
                     state.textList.forEach { text ->
                         val isSelected = state.selectedTextId == text.id
-                        val selectedStyle = text.style.copy(
-                            color = state.selectedColor,
-                            fontSize = state.selectedFontSize,
-                            fontType = state.selectedFont
-                        )
                         var textSize by remember { mutableStateOf(IntSize.Zero) }
                         val offsetX = pxToDp(text.offset.x) + 5.dp
                         val offsetY = pxToDp(text.offset.y) - 5.dp
                         MemeTextEditor(
                             isSelected = isSelected,
-                            data = if (isSelected) selectedStyle else text.style,
+                            data = if (isSelected) state.selectedStyle else text.style,
                             value = text.text,
                             onValueChange = { onAction(CreateAction.OnTextChanged(it)) },
                             onDeleteClicked = { onAction(CreateAction.OnRemoveText) },
@@ -280,7 +276,7 @@ private fun CreateScreen(
                                 val listState = rememberLazyListState()
                                 LaunchedEffect(key1 = Unit) {
                                     val targetIndex =
-                                        fontList.map { it.type }.indexOf(state.selectedFont)
+                                        fontList.map { it.type }.indexOf(state.selectedStyle.font)
                                     val middleOffset = listState.layoutInfo.viewportSize.width / 2
                                     listState.scrollToItem(
                                         index = targetIndex,
@@ -300,7 +296,7 @@ private fun CreateScreen(
                                     ) { memeFont ->
                                         Column(
                                             modifier = when {
-                                                state.selectedFont == memeFont.type -> Modifier
+                                                state.selectedStyle.font == memeFont.type -> Modifier
                                                     .clip(RoundedCornerShape(8.dp))
                                                     .background(SurfaceContainerHighDark)
                                                     .padding(8.dp)
@@ -353,7 +349,7 @@ private fun CreateScreen(
                                         )
                                     }
                                     MemeSlider(
-                                        value = state.selectedFontSize,
+                                        value = state.selectedStyle.size,
                                         onValueChange = {
                                             onAction(
                                                 CreateAction.OnTextFontSizeChanged(
@@ -385,7 +381,8 @@ private fun CreateScreen(
                                 ) {
                                     val listState = rememberLazyListState()
                                     LaunchedEffect(key1 = Unit) {
-                                        val targetIndex = colorList.indexOf(state.selectedColor)
+                                        val targetIndex =
+                                            colorList.indexOf(state.selectedStyle.color)
                                         val middleOffset =
                                             listState.layoutInfo.viewportSize.width / 2
                                         listState.scrollToItem(
@@ -405,7 +402,7 @@ private fun CreateScreen(
                                         ) { color ->
                                             Box(
                                                 modifier = when {
-                                                    state.selectedColor == color -> Modifier
+                                                    state.selectedStyle.color == color -> Modifier
                                                         .size(44.dp)
                                                         .clip(CircleShape)
                                                         .background(Color.White.copy(alpha = 0.2f))

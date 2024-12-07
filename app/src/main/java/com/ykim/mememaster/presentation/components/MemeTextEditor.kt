@@ -30,21 +30,22 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ykim.mememaster.presentation.model.MemeTextStyleData
+import com.ykim.mememaster.presentation.model.TextStyle
 import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
 fun MemeTextEditor(
     isSelected: Boolean = true,
-    data: MemeTextStyleData,
+    data: TextStyle,
     value: String = "",
     onValueChange: (String) -> Unit = {},
     onDeleteClicked: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier
-        .width(IntrinsicSize.Min)
+    Box(
+        modifier = modifier
+            .width(IntrinsicSize.Min)
     ) {
         val selectedPadding = if (isSelected) 10.dp else 0.dp
         Box(
@@ -71,13 +72,13 @@ fun MemeTextEditor(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.inversePrimary),
                 decorationBox = { innerTextField ->
                     innerTextField()
-                    if (data.fontType == MemeFontType.STROKE) {
+                    if (data.font == MemeFontType.STROKE) {
                         Text(
                             text = value, style = data.getTextStyle().copy(
                                 color = Color.Black,
                                 drawStyle = Stroke(
                                     miter = 10f,
-                                    width = data.fontSize / 10,
+                                    width = data.size / 10,
                                     join = StrokeJoin.Round
                                 )
                             )
@@ -117,9 +118,9 @@ private fun MemeTextEditorPreview() {
     MemeMasterTheme {
         MemeTextEditor(
             isSelected = true,
-            data = MemeTextStyleData(
-                fontSize = 80.sp.value,
-                fontType = MemeFontType.STROKE,
+            data = TextStyle(
+                size = 80.sp.value,
+                font = MemeFontType.STROKE,
                 color = Color.White
             ),
             value = "TEST",

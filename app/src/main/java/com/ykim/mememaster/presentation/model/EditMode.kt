@@ -1,4 +1,4 @@
-package com.ykim.mememaster.presentation.create
+package com.ykim.mememaster.presentation.model
 
 enum class EditMode {
     ADD,

@@ -5,16 +5,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
-import com.ykim.mememaster.presentation.model.MemeTextData
+import com.ykim.mememaster.presentation.model.EditMode
+import com.ykim.mememaster.presentation.model.OverlayText
+import com.ykim.mememaster.presentation.model.TextStyle
 import com.ykim.mememaster.presentation.navigation.Create
-import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.presentation.util.dpToPx
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,7 +39,7 @@ class CreateViewModel @Inject constructor(
             }
 
             is CreateAction.OnAddText -> {
-                val newText = MemeTextData()
+                val newText = OverlayText()
                 state = state.copy(
                     editMode = EditMode.NONE,
                     textList = state.textList + newText,
@@ -100,15 +99,27 @@ class CreateViewModel @Inject constructor(
             }
 
             is CreateAction.OnTextFontChanged -> {
-                state = state.copy(selectedFont = action.font)
+                state = state.copy(
+                    selectedStyle = state.selectedStyle.copy(
+                        font = action.font
+                    )
+                )
             }
 
             is CreateAction.OnTextFontSizeChanged -> {
-                state = state.copy(selectedFontSize = action.fontSize)
+                state = state.copy(
+                    selectedStyle = state.selectedStyle.copy(
+                        size = action.size
+                    )
+                )
             }
 
             is CreateAction.OnTextColorChanged -> {
-                state = state.copy(selectedColor = action.color)
+                state = state.copy(
+                    selectedStyle = state.selectedStyle.copy(
+                        color = action.color
+                    )
+                )
             }
 
             CreateAction.OnTextChangeDiscarded -> {
@@ -128,17 +139,13 @@ class CreateViewModel @Inject constructor(
         state = state.copy(
             selectedTextId = -1,
             editMode = EditMode.ADD,
-            selectedFont = MemeFontType.STROKE,
-            selectedFontSize = 40.sp.value,
-            selectedColor = Color.White
+            selectedStyle = TextStyle(),
         )
     }
 
     private fun resetSelectedStyle() {
         state = state.copy(
-            selectedFont = MemeFontType.STROKE,
-            selectedFontSize = 40.sp.value,
-            selectedColor = Color.White
+            selectedStyle = TextStyle(),
         )
     }
 
@@ -156,9 +163,7 @@ class CreateViewModel @Inject constructor(
     private fun setSelectedStyle(id: Long) {
         val selectedStyle = state.textList.find { it.id == id }?.style ?: return
         state = state.copy(
-            selectedFont = selectedStyle.fontType,
-            selectedFontSize = selectedStyle.fontSize,
-            selectedColor = selectedStyle.color
+            selectedStyle = selectedStyle,
         )
     }
 
@@ -168,9 +173,9 @@ class CreateViewModel @Inject constructor(
                 if (state.selectedTextId == it.id) {
                     it.copy(
                         style = it.style.copy(
-                            fontType = state.selectedFont,
-                            fontSize = state.selectedFontSize,
-                            color = state.selectedColor
+                            font = state.selectedStyle.font,
+                            size = state.selectedStyle.size,
+                            color = state.selectedStyle.color
                         )
                     )
                 } else {
