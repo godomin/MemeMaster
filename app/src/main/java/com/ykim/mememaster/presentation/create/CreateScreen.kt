@@ -122,8 +122,9 @@ private fun CreateScreen(
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = {
-                            focusManager.clearFocus()
-                            onAction(CreateAction.OnSelectedTextChanged(-1))
+                            if (keyboardVisible) {
+                                focusManager.clearFocus()
+                            }
                         }
                     )
                 }
@@ -181,12 +182,17 @@ private fun CreateScreen(
                 ) {
                     state.textList.forEach { text ->
                         val isSelected = state.selectedTextId == text.id
+                        val selectedStyle = text.style.copy(
+                            color = state.selectedColor,
+                            fontSize = state.selectedFontSize,
+                            fontType = state.selectedFont
+                        )
                         var textSize by remember { mutableStateOf(IntSize.Zero) }
                         val offsetX = pxToDp(text.offset.x) + 5.dp
                         val offsetY = pxToDp(text.offset.y) - 5.dp
                         MemeTextEditor(
                             isSelected = isSelected,
-                            data = text.style,
+                            data = if (isSelected) selectedStyle else text.style,
                             value = text.text,
                             onValueChange = { onAction(CreateAction.OnTextChanged(it)) },
                             onDeleteClicked = { onAction(CreateAction.OnRemoveText) },

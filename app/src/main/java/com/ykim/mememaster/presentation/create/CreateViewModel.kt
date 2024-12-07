@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
-import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.model.MemeTextData
 import com.ykim.mememaster.presentation.navigation.Create
 import com.ykim.mememaster.presentation.util.MemeFontType
@@ -41,9 +40,7 @@ class CreateViewModel @Inject constructor(
             }
 
             is CreateAction.OnAddText -> {
-                val newText = MemeTextData(
-                    text = context.getString(R.string.editor_default_text)
-                )
+                val newText = MemeTextData()
                 state = state.copy(
                     editMode = EditMode.NONE,
                     textList = state.textList + newText,
@@ -89,6 +86,7 @@ class CreateViewModel @Inject constructor(
                         selectedTextId = action.id,
                         editMode = EditMode.NONE
                     )
+                    setSelectedStyle(action.id)
                 }
             }
 
@@ -118,7 +116,7 @@ class CreateViewModel @Inject constructor(
             }
 
             CreateAction.OnTextChangeApplied -> {
-                // TODO: apply text style
+                applySelectedStyle()
                 stateToAddMode()
             }
 
@@ -153,5 +151,32 @@ class CreateViewModel @Inject constructor(
         val coercedX = newOffset.x.coerceIn(left, right)
         val coercedY = newOffset.y.coerceIn(top, bottom)
         return Offset(coercedX, coercedY)
+    }
+
+    private fun setSelectedStyle(id: Long) {
+        val selectedStyle = state.textList.find { it.id == id }?.style ?: return
+        state = state.copy(
+            selectedFont = selectedStyle.fontType,
+            selectedFontSize = selectedStyle.fontSize,
+            selectedColor = selectedStyle.color
+        )
+    }
+
+    private fun applySelectedStyle() {
+        state = state.copy(
+            textList = state.textList.map {
+                if (state.selectedTextId == it.id) {
+                    it.copy(
+                        style = it.style.copy(
+                            fontType = state.selectedFont,
+                            fontSize = state.selectedFontSize,
+                            color = state.selectedColor
+                        )
+                    )
+                } else {
+                    it
+                }
+            }
+        )
     }
 }
