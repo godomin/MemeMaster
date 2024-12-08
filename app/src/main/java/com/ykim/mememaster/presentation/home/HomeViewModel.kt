@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ykim.mememaster.domain.ImageRepository
 import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.presentation.util.sortByFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val imageRepository: ImageRepository,
 ) : ViewModel() {
     var state by mutableStateOf(HomeState())
         private set

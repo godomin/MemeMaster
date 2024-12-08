@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ykim.mememaster.domain.HistoryManager
 import com.ykim.mememaster.presentation.model.EditMode
@@ -17,8 +18,12 @@ import com.ykim.mememaster.presentation.model.OverlayText
 import com.ykim.mememaster.presentation.navigation.Create
 import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.presentation.util.dpToPx
+import com.ykim.mememaster.presentation.util.toBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -86,6 +91,14 @@ class CreateViewModel @Inject constructor(
 
             CreateAction.OnUndo -> undo()
             CreateAction.OnRedo -> redo()
+
+            is CreateAction.SaveMeme -> {
+                viewModelScope.launch {
+                    val bitmap = withContext(Dispatchers.Default) {
+                        action.picture.toBitmap()
+                    }
+                }
+            }
 
             else -> Unit
         }

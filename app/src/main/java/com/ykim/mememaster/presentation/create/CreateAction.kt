@@ -1,5 +1,6 @@
 package com.ykim.mememaster.presentation.create
 
+import android.graphics.Picture
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
@@ -32,4 +33,6 @@ sealed interface CreateAction {
 
     data object OnUndo : CreateAction
     data object OnRedo : CreateAction
+
+    data class SaveMeme(val picture: Picture) : CreateAction
 }

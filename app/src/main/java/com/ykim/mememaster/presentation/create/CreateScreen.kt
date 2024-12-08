@@ -76,15 +76,20 @@ import com.ykim.mememaster.presentation.components.MemeOutlinedButton
 import com.ykim.mememaster.presentation.components.MemeSlider
 import com.ykim.mememaster.presentation.components.MemeTextEditor
 import com.ykim.mememaster.presentation.model.EditMode
+import com.ykim.mememaster.presentation.util.CapturingProgress
 import com.ykim.mememaster.presentation.util.applyIf
+import com.ykim.mememaster.presentation.util.capture
 import com.ykim.mememaster.presentation.util.draggable
 import com.ykim.mememaster.presentation.util.getImageSize
 import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.presentation.util.pxToDp
 import com.ykim.mememaster.presentation.util.rememberCaptureState
 import com.ykim.mememaster.presentation.util.rememberKeyboardVisibility
+import com.ykim.mememaster.presentation.util.toBitmap
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import com.ykim.mememaster.ui.theme.SurfaceContainerHighDark
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CreateScreenRoot(
@@ -117,11 +122,21 @@ private fun CreateScreen(
         showLeaveEditorDialog = true
     }
     var showSaveBottomSheet by remember { mutableStateOf(false) }
-    var captureState = rememberCaptureState()
+    val captureState = rememberCaptureState()
     val focusManager = LocalFocusManager.current
     val keyboardVisible by rememberKeyboardVisibility()
     var screenSize by remember { mutableStateOf(IntSize.Zero) }
     var imageSize by remember { mutableStateOf(IntSize.Zero) }
+
+    LaunchedEffect(key1 = captureState.progress) {
+        when (val progress = captureState.progress) {
+            CapturingProgress.Idle -> {}
+            CapturingProgress.Capturing -> {}
+            is CapturingProgress.Captured -> { onAction(CreateAction.SaveMeme(progress.picture)) }
+            is CapturingProgress.Error -> {}
+        }
+    }
+
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -165,7 +180,8 @@ private fun CreateScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .capture(captureState),
                 contentAlignment = Alignment.Center
             ) {
                 val painter = rememberAsyncImagePainter(state.templateResId)
@@ -529,7 +545,7 @@ private fun CreateScreen(
                             icon = ImageVector.vectorResource(id = R.drawable.icon_save_meme),
                             title = stringResource(id = R.string.save_meme_title),
                             description = stringResource(id = R.string.save_meme_description),
-                            onClick = {  }
+                            onClick = { captureState.capture() }
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         BottomSheetItem(
