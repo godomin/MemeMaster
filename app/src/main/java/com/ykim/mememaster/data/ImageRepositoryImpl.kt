@@ -39,28 +39,26 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
         }
     }
 
-    override suspend fun saveImage(imageData: ImageData): String {
+    override suspend fun saveImage(imageData: ImageData) {
         val bitmap = BitmapMapper.byteArrayToBitmap(imageData.byteArray)
+        saveImageToInternalStorage(imageData.fileName, bitmap)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             saveImageAbove29(imageData.fileName, bitmap)
         } else {
             saveImageBelow28(imageData.fileName, bitmap)
         }
-        return saveImageToInternalStorage(imageData.fileName, bitmap)
     }
 
-    private suspend fun saveImageToInternalStorage(fileName: String, bitmap: Bitmap): String {
-        return try {
+    private suspend fun saveImageToInternalStorage(fileName: String, bitmap: Bitmap) {
+        try {
             val file = File(context.filesDir, fileName)
             withContext(Dispatchers.IO) {
                 context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 }
             }
-            FileProvider.getUriForFile(context, "${context.packageName}.provider", file).toString()
         } catch (e: Exception) {
             e.printStackTrace()
-            ""
         }
     }
 

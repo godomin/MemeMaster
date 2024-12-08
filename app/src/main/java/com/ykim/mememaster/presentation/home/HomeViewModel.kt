@@ -5,11 +5,10 @@ import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ykim.mememaster.domain.ImageRepository
-import com.ykim.mememaster.presentation.model.Meme
+import com.ykim.mememaster.domain.model.MemeData
 import com.ykim.mememaster.presentation.util.sortByFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,10 +30,10 @@ class HomeViewModel @Inject constructor(
 
     init {
         // TODO: load from repo
-        val list = mutableListOf<Meme>()
+        val list = mutableListOf<MemeData>()
         (0..9).forEach {
-            list += Meme(
-                uri = "$it",
+            list += MemeData(
+                fileName = "$it",
                 isFavorite = false,
                 isSelected = false,
                 timestamp = 0L
@@ -89,11 +88,11 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    private fun onFavoriteToggled(item: Meme) {
+    private fun onFavoriteToggled(item: MemeData) {
         val newItem = item.copy(isFavorite = !item.isFavorite)
         state = state.copy(
             list = state.list.map {
-                if (it.uri == item.uri) {
+                if (it.fileName == item.fileName) {
                     newItem
                 } else {
                     it
@@ -103,11 +102,11 @@ class HomeViewModel @Inject constructor(
         // TODO: update to repo
     }
 
-    private fun onItemSelected(item: Meme, forceSelect: Boolean = false) {
+    private fun onItemSelected(item: MemeData, forceSelect: Boolean = false) {
         val newItem = item.copy(isSelected = !item.isSelected || forceSelect)
         state = state.copy(
             list = state.list.map {
-                if (it.uri == item.uri) {
+                if (it.fileName == item.fileName) {
                     newItem
                 } else {
                     it
@@ -116,7 +115,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    private fun onItemLongPressed(item: Meme) {
+    private fun onItemLongPressed(item: MemeData) {
         onItemSelected(item, true)
         state = state.copy(mode = ItemMode.SELECT)
     }
@@ -129,7 +128,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun shareSelectedItems() {
-        val uriList = state.list.filter { it.isSelected }.map { Uri.parse(it.uri) }
+        val uriList = state.list.filter { it.isSelected }.map { Uri.parse(it.fileName) }
         viewModelScope.launch {
             eventChannel.send(HomeEvent.StartShareChooser(ArrayList(uriList)))
         }

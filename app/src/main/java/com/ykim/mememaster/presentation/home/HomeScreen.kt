@@ -54,7 +54,7 @@ import com.ykim.mememaster.presentation.components.MemeIcon
 import com.ykim.mememaster.presentation.components.MemeSearchField
 import com.ykim.mememaster.presentation.components.MemeSquareItem
 import com.ykim.mememaster.presentation.components.MemeSquareItemExtended
-import com.ykim.mememaster.presentation.model.Meme
+import com.ykim.mememaster.domain.model.MemeData
 import com.ykim.mememaster.presentation.util.getGradientBrush
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
@@ -193,7 +193,7 @@ private fun HomeScreen(
                         ) {
                             items(
                                 items = state.list,
-                                key = { it.uri }
+                                key = { it.fileName }
                             ) { item ->
                                 MemeSquareItemExtended(
                                     item = item,
@@ -326,20 +326,20 @@ private fun HomeScreenPreview() {
         HomeScreen(
             state = HomeState(
                 list = listOf(
-                    Meme(
-                        uri = "1",
+                    MemeData(
+                        fileName = "1",
                         isFavorite = true,
                         isSelected = true,
                         timestamp = 0L
                     ),
-                    Meme(
-                        uri = "2",
+                    MemeData(
+                        fileName = "2",
                         isFavorite = false,
                         isSelected = false,
                         timestamp = 0L
                     ),
-                    Meme(
-                        uri = "3",
+                    MemeData(
+                        fileName = "3",
                         isFavorite = false,
                         isSelected = false,
                         timestamp = 0L

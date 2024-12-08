@@ -27,20 +27,20 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.home.ItemMode
-import com.ykim.mememaster.presentation.model.Meme
+import com.ykim.mememaster.domain.model.MemeData
 import com.ykim.mememaster.presentation.util.getGradientBrush
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
 fun MemeSquareItemExtended(
-    item: Meme,
+    item: MemeData,
     mode: ItemMode,
     onIconClicked: () -> Unit = {},
     onLongPress: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     MemeSquareItem(
-        model = Uri.parse(item.uri),
+        model = Uri.parse(item.fileName),
         modifier = modifier,
         onClick = if (mode == ItemMode.SELECT) {
             onIconClicked
@@ -117,8 +117,8 @@ fun MemeSquareItem(
 private fun MemeSquareItemPreview(modifier: Modifier = Modifier) {
     MemeMasterTheme {
         MemeSquareItemExtended(
-            Meme(
-                uri = "",
+            MemeData(
+                fileName = "",
                 isFavorite = true,
                 isSelected = false,
                 timestamp = 0L

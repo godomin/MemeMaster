@@ -6,5 +6,5 @@ import java.io.File
 interface ImageRepository {
     suspend fun getImageFile(name: String): File?
     suspend fun deleteImages(images: List<String>)
-    suspend fun saveImage(imageData: ImageData): String
+    suspend fun saveImage(imageData: ImageData)
 }

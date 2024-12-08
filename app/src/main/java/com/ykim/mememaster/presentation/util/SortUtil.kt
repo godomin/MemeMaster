@@ -1,9 +1,9 @@
 package com.ykim.mememaster.presentation.util
 
 import com.ykim.mememaster.presentation.home.DropdownList
-import com.ykim.mememaster.presentation.model.Meme
+import com.ykim.mememaster.domain.model.MemeData
 
-fun List<Meme>.sortByFilter(filter: DropdownList): List<Meme> {
+fun List<MemeData>.sortByFilter(filter: DropdownList): List<MemeData> {
     return sortedByDescending {
         when (filter) {
             DropdownList.FAVORITE -> if (it.isFavorite) 1 else 0
