@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -68,6 +69,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.ykim.mememaster.R
 import com.ykim.mememaster.presentation.components.MemeButton
 import com.ykim.mememaster.presentation.components.MemeDialog
@@ -85,11 +87,8 @@ import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.presentation.util.pxToDp
 import com.ykim.mememaster.presentation.util.rememberCaptureState
 import com.ykim.mememaster.presentation.util.rememberKeyboardVisibility
-import com.ykim.mememaster.presentation.util.toBitmap
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import com.ykim.mememaster.ui.theme.SurfaceContainerHighDark
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 @Composable
 fun CreateScreenRoot(
@@ -132,7 +131,10 @@ private fun CreateScreen(
         when (val progress = captureState.progress) {
             CapturingProgress.Idle -> {}
             CapturingProgress.Capturing -> {}
-            is CapturingProgress.Captured -> { onAction(CreateAction.SaveMeme(progress.picture)) }
+            is CapturingProgress.Captured -> {
+                onAction(CreateAction.SaveMeme(progress.picture, imageSize))
+            }
+
             is CapturingProgress.Error -> {}
         }
     }
@@ -184,7 +186,11 @@ private fun CreateScreen(
                     .capture(captureState),
                 contentAlignment = Alignment.Center
             ) {
-                val painter = rememberAsyncImagePainter(state.templateResId)
+                val imageRequest = ImageRequest.Builder(LocalContext.current)
+                    .data(state.templateResId)
+                    .allowHardware(false)
+                    .build()
+                val painter = rememberAsyncImagePainter(imageRequest)
                 val imageState = painter.state
                 LaunchedEffect(key1 = imageState is AsyncImagePainter.State.Success) {
                     if (imageState is AsyncImagePainter.State.Success) {
@@ -545,14 +551,19 @@ private fun CreateScreen(
                             icon = ImageVector.vectorResource(id = R.drawable.icon_save_meme),
                             title = stringResource(id = R.string.save_meme_title),
                             description = stringResource(id = R.string.save_meme_description),
-                            onClick = { captureState.capture() }
+                            onClick = {
+                                captureState.capture()
+                                showSaveBottomSheet = false
+                            }
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                         BottomSheetItem(
                             icon = Icons.Default.Share,
                             title = stringResource(id = R.string.share_meme_title),
                             description = stringResource(id = R.string.share_meme_description),
-                            onClick = {  }
+                            onClick = {
+                                showSaveBottomSheet = false
+                            }
                         )
                     }
                 }
@@ -627,7 +638,11 @@ private fun BottomSheetItem(
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(imageVector = icon, contentDescription = "", tint = MaterialTheme.colorScheme.secondary)
+        Icon(
+            imageVector = icon,
+            contentDescription = "",
+            tint = MaterialTheme.colorScheme.secondary
+        )
         Spacer(modifier = Modifier.width(12.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),

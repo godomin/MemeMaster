@@ -12,7 +12,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.ykim.mememaster.data.BitmapMapper
 import com.ykim.mememaster.domain.HistoryManager
+import com.ykim.mememaster.domain.ImageRepository
+import com.ykim.mememaster.domain.model.ImageData
 import com.ykim.mememaster.presentation.model.EditMode
 import com.ykim.mememaster.presentation.model.OverlayText
 import com.ykim.mememaster.presentation.navigation.Create
@@ -24,13 +27,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
-    private val historyManager: HistoryManager<List<OverlayText>>
+    private val historyManager: HistoryManager<List<OverlayText>>,
+    private val imageRepository: ImageRepository,
 ) : ViewModel() {
     var state by mutableStateOf(CreateState())
         private set
@@ -95,8 +102,14 @@ class CreateViewModel @Inject constructor(
             is CreateAction.SaveMeme -> {
                 viewModelScope.launch {
                     val bitmap = withContext(Dispatchers.Default) {
-                        action.picture.toBitmap()
+                        action.picture.toBitmap(action.imageSize)
                     }
+                    imageRepository.saveImage(
+                        ImageData(
+                            fileName = getFileName(),
+                            byteArray = BitmapMapper.bitmapToArray(bitmap)
+                        )
+                    )
                 }
             }
 
@@ -192,5 +205,10 @@ class CreateViewModel @Inject constructor(
         state = state.copy(
             textList = list
         )
+    }
+
+    private fun getFileName(): String {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        return "MEME_$timestamp.jpg"
     }
 }

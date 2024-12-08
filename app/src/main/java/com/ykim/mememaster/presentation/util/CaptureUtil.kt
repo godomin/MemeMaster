@@ -13,9 +13,7 @@ import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.drawscope.draw
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import java.io.File
-import java.io.FileOutputStream
-import java.util.Date
+import androidx.compose.ui.unit.IntSize
 
 sealed class CapturingProgress {
     data object Idle : CapturingProgress()
@@ -72,24 +70,16 @@ fun Modifier.capture(state: CaptureState): Modifier {
     })
 }
 
-fun Picture.toBitmap(): Bitmap {
+fun Picture.toBitmap(imageSize: IntSize): Bitmap {
     val bitmap = Bitmap.createBitmap(
-        this.width,
-        this.height,
+        imageSize.width,
+        imageSize.height,
         Bitmap.Config.ARGB_8888
     )
 
     val canvas = android.graphics.Canvas(bitmap)
+    canvas.clipRect(0f, 0f, imageSize.width.toFloat(), imageSize.height.toFloat())
+    canvas.translate(-(width - imageSize.width) / 2f, -(height - imageSize.height) / 2f)
     canvas.drawPicture(this)
     return bitmap
-}
-
-fun Bitmap.saveAsFile(filePath: String, fileName: String = Date().time.toString()): File? {
-    return kotlin.runCatching {
-        File(filePath, "${fileName}.jpg").apply {
-            FileOutputStream(this).use {
-                compress(Bitmap.CompressFormat.JPEG, 100, it)
-            }
-        }
-    }.getOrNull()
 }

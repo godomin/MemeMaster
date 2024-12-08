@@ -22,7 +22,7 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
     override suspend fun getImageFile(name: String): File? {
         return withContext(Dispatchers.IO) {
             val filesDir = context.filesDir
-            filesDir.listFiles()?.find { it.name == "$name.jpg" }
+            filesDir.listFiles()?.find { it.name == name }
         }
     }
 
@@ -30,7 +30,7 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
         withContext(Dispatchers.IO) {
             for (image in images) {
                 try {
-                    val file = File(context.filesDir, "$image.jpg")
+                    val file = File(context.filesDir, image)
                     file.delete()
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -40,7 +40,7 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
     }
 
     override suspend fun saveImage(imageData: ImageData): String {
-        val bitmap = BitmapMapper.byteArrayToBitmap(imageData.imageData)
+        val bitmap = BitmapMapper.byteArrayToBitmap(imageData.byteArray)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             saveImageAbove29(imageData.fileName, bitmap)
         } else {
@@ -51,9 +51,9 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
 
     private suspend fun saveImageToInternalStorage(fileName: String, bitmap: Bitmap): String {
         return try {
-            val file = File(context.filesDir, "$fileName.jpg")
+            val file = File(context.filesDir, fileName)
             withContext(Dispatchers.IO) {
-                context.openFileOutput("$fileName.jpg", Context.MODE_PRIVATE).use { outputStream ->
+                context.openFileOutput(fileName, Context.MODE_PRIVATE).use { outputStream ->
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 }
             }
@@ -67,7 +67,7 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
     private suspend fun saveImageAbove29(fileName: String, bitmap: Bitmap) {
         val resolver = context.contentResolver
         val contentValues = ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, "$fileName.jpg")
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             put(
                 MediaStore.Images.Media.RELATIVE_PATH,
@@ -87,7 +87,7 @@ class ImageRepositoryImpl @Inject constructor(private val context: Context) : Im
     private suspend fun saveImageBelow28(fileName: String, bitmap: Bitmap) {
         val picturesDir =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-        val file = File(picturesDir, "$fileName.jpg")
+        val file = File(picturesDir, fileName)
         withContext(Dispatchers.IO) {
             FileOutputStream(file).use { outputStream ->
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
