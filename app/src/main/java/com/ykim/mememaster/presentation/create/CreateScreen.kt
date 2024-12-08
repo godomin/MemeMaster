@@ -31,8 +31,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,6 +81,7 @@ import com.ykim.mememaster.presentation.util.draggable
 import com.ykim.mememaster.presentation.util.getImageSize
 import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.presentation.util.pxToDp
+import com.ykim.mememaster.presentation.util.rememberCaptureState
 import com.ykim.mememaster.presentation.util.rememberKeyboardVisibility
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import com.ykim.mememaster.ui.theme.SurfaceContainerHighDark
@@ -101,6 +106,7 @@ fun CreateScreenRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CreateScreen(
     state: CreateState,
@@ -110,6 +116,8 @@ private fun CreateScreen(
     BackHandler {
         showLeaveEditorDialog = true
     }
+    var showSaveBottomSheet by remember { mutableStateOf(false) }
+    var captureState = rememberCaptureState()
     val focusManager = LocalFocusManager.current
     val keyboardVisible by rememberKeyboardVisibility()
     var screenSize by remember { mutableStateOf(IntSize.Zero) }
@@ -263,7 +271,7 @@ private fun CreateScreen(
                         )
                         MemeButton(
                             text = stringResource(id = R.string.save_meme),
-                            onClick = {}
+                            onClick = { showSaveBottomSheet = true }
                         )
                     }
                 } else {
@@ -501,6 +509,38 @@ private fun CreateScreen(
                     }
                 }
             }
+            if (showSaveBottomSheet) {
+                ModalBottomSheet(
+                    onDismissRequest = { showSaveBottomSheet = false },
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    dragHandle = {
+                        BottomSheetDefaults.DragHandle(
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        BottomSheetItem(
+                            icon = ImageVector.vectorResource(id = R.drawable.icon_save_meme),
+                            title = stringResource(id = R.string.save_meme_title),
+                            description = stringResource(id = R.string.save_meme_description),
+                            onClick = {  }
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                        BottomSheetItem(
+                            icon = Icons.Default.Share,
+                            title = stringResource(id = R.string.share_meme_title),
+                            description = stringResource(id = R.string.share_meme_description),
+                            onClick = {  }
+                        )
+                    }
+                }
+            }
         }
         if (showLeaveEditorDialog) {
             MemeDialog(
@@ -554,6 +594,40 @@ private fun ToolbarIcon(
         contentAlignment = Alignment.Center
     ) {
         content()
+    }
+}
+
+@Composable
+private fun BottomSheetItem(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = icon, contentDescription = "", tint = MaterialTheme.colorScheme.secondary)
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title, style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            )
+            Text(
+                text = title, style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.outline
+                )
+            )
+        }
     }
 }
 
