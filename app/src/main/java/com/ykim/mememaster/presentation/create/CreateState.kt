@@ -7,7 +7,6 @@ import com.ykim.mememaster.presentation.model.TextStyle
 data class CreateState(
     val templateResId: Int = 0,
     val editMode: EditMode = EditMode.ADD,
-    val selectedStyle: TextStyle = TextStyle(),
-    val selectedTextId: Long = -1,
+    val selectedText: OverlayText = OverlayText(),
     val textList: List<OverlayText> = emptyList(),
 )

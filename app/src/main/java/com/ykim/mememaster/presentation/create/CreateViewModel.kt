@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.center
 import androidx.lifecycle.SavedStateHandle
@@ -12,8 +13,8 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import com.ykim.mememaster.presentation.model.EditMode
 import com.ykim.mememaster.presentation.model.OverlayText
-import com.ykim.mememaster.presentation.model.TextStyle
 import com.ykim.mememaster.presentation.navigation.Create
+import com.ykim.mememaster.presentation.util.MemeFontType
 import com.ykim.mememaster.presentation.util.dpToPx
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,87 +40,45 @@ class CreateViewModel @Inject constructor(
             }
 
             is CreateAction.OnAddText -> {
-                val newText = OverlayText()
                 state = state.copy(
                     editMode = EditMode.NONE,
-                    textList = state.textList + newText,
-                    selectedTextId = newText.id
+                    textList = state.textList + state.selectedText
                 )
             }
 
             is CreateAction.OnTextChanged -> {
-                state = state.copy(
-                    textList = state.textList.map {
-                        if (it.id == state.selectedTextId) {
-                            it.copy(text = action.text)
-                        } else {
-                            it
-                        }
-                    }
-                )
+                updateSelectedText(text = action.text)
             }
 
             is CreateAction.OnTextOffsetChanged -> {
-                state = state.copy(
-                    textList = state.textList.map {
-                        if (it.id == state.selectedTextId) {
-                            it.copy(
-                                offset = coercedOffset(
-                                    action.imageSize,
-                                    action.textSize,
-                                    it.offset + action.offset
-                                )
-                            )
-                        } else {
-                            it
-                        }
-                    }
-                )
+                dragText(action.imageSize, action.textSize, action.offset)
             }
 
             is CreateAction.OnSelectedTextChanged -> {
-                if (action.id == -1L) {
-                    stateToAddMode()
-                } else {
-                    state = state.copy(
-                        selectedTextId = action.id,
-                        editMode = EditMode.NONE
-                    )
-                    setSelectedStyle(action.id)
-                }
+                state = state.copy(
+                    selectedText = action.text,
+                    editMode = EditMode.NONE
+                )
             }
 
             CreateAction.OnRemoveText -> {
                 state = state.copy(
-                    textList = state.textList.filter { it.id != state.selectedTextId },
-                    selectedTextId = -1,
-                    editMode = EditMode.ADD
+                    textList = state.textList.filter { it.id != state.selectedText.id },
+                    editMode = EditMode.ADD,
+                    selectedText = OverlayText()
                 )
-                resetSelectedStyle()
             }
 
             is CreateAction.OnTextFontChanged -> {
-                state = state.copy(
-                    selectedStyle = state.selectedStyle.copy(
-                        font = action.font
-                    )
-                )
+                updateSelectedText(font = action.font)
             }
 
             is CreateAction.OnTextFontSizeChanged -> {
-                state = state.copy(
-                    selectedStyle = state.selectedStyle.copy(
-                        size = action.size
-                    )
-                )
+                updateSelectedText(size = action.size)
             }
 
             is CreateAction.OnTextColorChanged -> {
-                state = state.copy(
-                    selectedStyle = state.selectedStyle.copy(
-                        color = action.color
-                    )
-                )
+                updateSelectedText(color = action.color)
             }
 
             CreateAction.OnTextChangeDiscarded -> {
@@ -131,21 +90,25 @@ class CreateViewModel @Inject constructor(
                 stateToAddMode()
             }
 
+            CreateAction.OnUndo -> {
+
+            }
+
+            CreateAction.OnRedo -> {
+
+            }
+
             else -> Unit
         }
     }
 
-    private fun stateToAddMode() {
-        state = state.copy(
-            selectedTextId = -1,
-            editMode = EditMode.ADD,
-            selectedStyle = TextStyle(),
-        )
-    }
-
-    private fun resetSelectedStyle() {
-        state = state.copy(
-            selectedStyle = TextStyle(),
+    private fun dragText(imageSize: IntSize, textSize: IntSize, offset: Offset) {
+        updateSelectedText(
+            offset = coercedOffset(
+                imageSize = imageSize,
+                textSize = textSize,
+                newOffset = state.selectedText.offset + offset
+            )
         )
     }
 
@@ -160,28 +123,42 @@ class CreateViewModel @Inject constructor(
         return Offset(coercedX, coercedY)
     }
 
-    private fun setSelectedStyle(id: Long) {
-        val selectedStyle = state.textList.find { it.id == id }?.style ?: return
+    private fun stateToAddMode() {
         state = state.copy(
-            selectedStyle = selectedStyle,
+            editMode = EditMode.ADD,
+            selectedText = OverlayText(),
         )
     }
 
     private fun applySelectedStyle() {
         state = state.copy(
             textList = state.textList.map {
-                if (state.selectedTextId == it.id) {
-                    it.copy(
-                        style = it.style.copy(
-                            font = state.selectedStyle.font,
-                            size = state.selectedStyle.size,
-                            color = state.selectedStyle.color
-                        )
-                    )
+                if (state.selectedText.id == it.id) {
+                    state.selectedText
                 } else {
                     it
                 }
             }
+        )
+    }
+
+    private fun updateSelectedText(
+        text: String? = null,
+        offset: Offset? = null,
+        font: MemeFontType? = null,
+        size: Float? = null,
+        color: Color? = null,
+    ) {
+        state = state.copy(
+            selectedText = state.selectedText.copy(
+                text = text ?: state.selectedText.text,
+                offset = offset ?: state.selectedText.offset,
+                style = state.selectedText.style.copy(
+                    font = font ?: state.selectedText.style.font,
+                    size = size ?: state.selectedText.style.size,
+                    color = color ?: state.selectedText.style.color
+                )
+            )
         )
     }
 }

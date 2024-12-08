@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntSize
 import com.ykim.mememaster.presentation.model.EditMode
+import com.ykim.mememaster.presentation.model.OverlayText
 import com.ykim.mememaster.presentation.util.MemeFontType
 
 sealed interface CreateAction {
@@ -18,7 +19,7 @@ sealed interface CreateAction {
         val offset: Offset
     ) : CreateAction
 
-    data class OnSelectedTextChanged(val id: Long) : CreateAction
+    data class OnSelectedTextChanged(val text: OverlayText) : CreateAction
 
     data class OnEditModeChanged(val editMode: EditMode) : CreateAction
 
@@ -28,4 +29,7 @@ sealed interface CreateAction {
 
     data object OnTextChangeApplied : CreateAction
     data object OnTextChangeDiscarded : CreateAction
+
+    data object OnUndo : CreateAction
+    data object OnRedo : CreateAction
 }
