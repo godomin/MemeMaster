@@ -246,14 +246,14 @@ private fun CreateScreen(
                         Row {
                             MemeIcon(
                                 icon = ImageVector.vectorResource(id = R.drawable.icon_undo),
-                                onClick = { /*TODO*/ },
-                                enabled = true
+                                onClick = { onAction(CreateAction.OnUndo) },
+                                enabled = state.canUndo
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             MemeIcon(
                                 icon = ImageVector.vectorResource(id = R.drawable.icon_redo),
-                                onClick = { /*TODO*/ },
-                                enabled = true
+                                onClick = { onAction(CreateAction.OnRedo) },
+                                enabled = state.canRedo
                             )
                         }
                         MemeOutlinedButton(

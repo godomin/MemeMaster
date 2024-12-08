@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.center
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
+import com.ykim.mememaster.domain.HistoryManager
 import com.ykim.mememaster.presentation.model.EditMode
 import com.ykim.mememaster.presentation.model.OverlayText
 import com.ykim.mememaster.presentation.navigation.Create
@@ -24,6 +25,7 @@ import javax.inject.Inject
 class CreateViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
+    private val historyManager: HistoryManager<List<OverlayText>>
 ) : ViewModel() {
     var state by mutableStateOf(CreateState())
         private set
@@ -31,6 +33,7 @@ class CreateViewModel @Inject constructor(
     init {
         val templateResId = savedStateHandle.toRoute<Create>().templateResId
         state = state.copy(templateResId = templateResId)
+        historyManager.add(emptyList())
     }
 
     fun onAction(action: CreateAction) {
@@ -46,9 +49,7 @@ class CreateViewModel @Inject constructor(
                 )
             }
 
-            is CreateAction.OnTextChanged -> {
-                updateSelectedText(text = action.text)
-            }
+            is CreateAction.OnTextChanged -> updateSelectedText(text = action.text)
 
             is CreateAction.OnTextOffsetChanged -> {
                 dragText(action.imageSize, action.textSize, action.offset)
@@ -69,17 +70,9 @@ class CreateViewModel @Inject constructor(
                 )
             }
 
-            is CreateAction.OnTextFontChanged -> {
-                updateSelectedText(font = action.font)
-            }
-
-            is CreateAction.OnTextFontSizeChanged -> {
-                updateSelectedText(size = action.size)
-            }
-
-            is CreateAction.OnTextColorChanged -> {
-                updateSelectedText(color = action.color)
-            }
+            is CreateAction.OnTextFontChanged -> updateSelectedText(font = action.font)
+            is CreateAction.OnTextFontSizeChanged -> updateSelectedText(size = action.size)
+            is CreateAction.OnTextColorChanged -> updateSelectedText(color = action.color)
 
             CreateAction.OnTextChangeDiscarded -> {
                 stateToAddMode()
@@ -87,16 +80,12 @@ class CreateViewModel @Inject constructor(
 
             CreateAction.OnTextChangeApplied -> {
                 applySelectedStyle()
+                addHistoryState()
                 stateToAddMode()
             }
 
-            CreateAction.OnUndo -> {
-
-            }
-
-            CreateAction.OnRedo -> {
-
-            }
+            CreateAction.OnUndo -> undo()
+            CreateAction.OnRedo -> redo()
 
             else -> Unit
         }
@@ -159,6 +148,36 @@ class CreateViewModel @Inject constructor(
                     color = color ?: state.selectedText.style.color
                 )
             )
+        )
+    }
+
+    private fun addHistoryState() {
+        historyManager.add(state.textList)
+        updateUndoRedoState()
+    }
+
+    private fun undo() {
+        if (!historyManager.canUndo()) return
+        setUndoRedoState(historyManager.undo())
+        updateUndoRedoState()
+    }
+
+    private fun redo() {
+        if (!historyManager.canRedo()) return
+        setUndoRedoState(historyManager.redo())
+        updateUndoRedoState()
+    }
+
+    private fun updateUndoRedoState() {
+        state = state.copy(
+            canUndo = historyManager.canUndo(),
+            canRedo = historyManager.canRedo()
+        )
+    }
+
+    private fun setUndoRedoState(list: List<OverlayText>) {
+        state = state.copy(
+            textList = list
         )
     }
 }

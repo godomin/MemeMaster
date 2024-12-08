@@ -16,8 +16,8 @@ interface AppModule {
     companion object {
         @Provides
         @Singleton
-        fun provideHistoryManager(): HistoryManager<OverlayText> {
-            return HistoryManagerImpl(5)
+        fun provideHistoryManager(): HistoryManager<List<OverlayText>> {
+            return HistoryManagerImpl(6)    // initial state + max redo state (5)
         }
     }
 }
