@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ykim.mememaster.presentation.model.TextStyle
 import com.ykim.mememaster.presentation.util.MemeFontType
+import com.ykim.mememaster.presentation.util.applyIf
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
@@ -53,18 +54,18 @@ fun MemeTextEditor(
                 .padding(top = 10.dp, end = selectedPadding)
         ) {
             BasicTextField(
-                modifier = when {
-                    isSelected -> Modifier
+                modifier = Modifier.applyIf(isSelected, {
+                    Modifier
                         .clip(RoundedCornerShape(4.dp))
                         .border(width = 1.dp, color = Color.White, shape = RoundedCornerShape(4.dp))
                         .widthIn(min = 0.dp)
                         .width(IntrinsicSize.Min)
                         .padding(start = 12.dp, end = 12.dp)
                         .verticalScroll(rememberScrollState(), false)
-
-                    else -> Modifier
+                }, {
+                    Modifier
                         .padding(start = 12.dp, end = 22.dp)
-                },
+                }),
                 enabled = isSelected,
                 value = value,
                 onValueChange = onValueChange,

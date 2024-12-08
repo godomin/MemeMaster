@@ -72,6 +72,7 @@ import com.ykim.mememaster.presentation.components.MemeOutlinedButton
 import com.ykim.mememaster.presentation.components.MemeSlider
 import com.ykim.mememaster.presentation.components.MemeTextEditor
 import com.ykim.mememaster.presentation.model.EditMode
+import com.ykim.mememaster.presentation.util.applyIf
 import com.ykim.mememaster.presentation.util.draggable
 import com.ykim.mememaster.presentation.util.getImageSize
 import com.ykim.mememaster.presentation.util.getTextComposable
@@ -213,7 +214,7 @@ private fun CreateScreen(
                                     onClick = {
                                         if (keyboardVisible) {
                                             focusManager.clearFocus()
-                                        } else if (state.textList.none { it.id == state.selectedText.id }){
+                                        } else if (state.textList.none { it.id == state.selectedText.id }) {
                                             onAction(CreateAction.OnSelectedTextChanged(displayText))
                                         }
                                     }
@@ -297,22 +298,24 @@ private fun CreateScreen(
                                         items = fontList
                                     ) { memeFont ->
                                         Column(
-                                            modifier = when {
-                                                state.selectedText.style.font == memeFont.type -> Modifier
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(SurfaceContainerHighDark)
-                                                    .padding(8.dp)
-
-                                                else -> Modifier
-                                                    .clickable {
-                                                        onAction(
-                                                            CreateAction.OnTextFontChanged(
-                                                                memeFont.type
+                                            modifier = Modifier.applyIf(
+                                                state.selectedText.style.font == memeFont.type, {
+                                                    Modifier
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(SurfaceContainerHighDark)
+                                                        .padding(8.dp)
+                                                }, {
+                                                    Modifier
+                                                        .clickable {
+                                                            onAction(
+                                                                CreateAction.OnTextFontChanged(
+                                                                    memeFont.type
+                                                                )
                                                             )
-                                                        )
-                                                    }
-                                                    .padding(8.dp)
-                                            },
+                                                        }
+                                                        .padding(8.dp)
+                                                }
+                                            ),
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalArrangement = Arrangement.Center
                                         ) {
@@ -403,15 +406,17 @@ private fun CreateScreen(
                                             items = colorList
                                         ) { color ->
                                             Box(
-                                                modifier = when {
-                                                    state.selectedText.style.color == color -> Modifier
-                                                        .size(44.dp)
-                                                        .clip(CircleShape)
-                                                        .background(Color.White.copy(alpha = 0.2f))
-
-                                                    else -> Modifier
-                                                        .size(44.dp)
-                                                },
+                                                modifier = Modifier.applyIf(
+                                                    state.selectedText.style.color == color, {
+                                                        Modifier
+                                                            .size(44.dp)
+                                                            .clip(CircleShape)
+                                                            .background(Color.White.copy(alpha = 0.2f))
+                                                    }, {
+                                                        Modifier
+                                                            .size(44.dp)
+                                                    }
+                                                ),
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Box(
@@ -533,21 +538,19 @@ private fun ToolbarIcon(
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = when {
-            selected -> {
+        modifier = modifier.applyIf(
+            selected, {
                 modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(SurfaceContainerHighDark)
                     .clickable(onClick = onClick)
-            }
-
-            else -> {
+            }, {
                 modifier
                     .size(48.dp)
                     .clickable(onClick = onClick)
             }
-        },
+        ),
         contentAlignment = Alignment.Center
     ) {
         content()

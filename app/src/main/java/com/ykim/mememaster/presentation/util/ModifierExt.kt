@@ -12,3 +12,9 @@ fun Modifier.draggable(onDrag: (Offset) -> Unit): Modifier {
         }
     }
 }
+
+inline fun Modifier.applyIf(
+    conditional: Boolean,
+    whenTrue: Modifier.() -> Modifier,
+    whenFalse: Modifier.() -> Modifier = { this }
+): Modifier = if (conditional) then(whenTrue(Modifier)) else then(whenFalse(Modifier))
