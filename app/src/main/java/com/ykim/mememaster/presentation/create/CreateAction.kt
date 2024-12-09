@@ -35,4 +35,5 @@ sealed interface CreateAction {
     data object OnRedo : CreateAction
 
     data class SaveMeme(val picture: Picture, val imageSize: IntSize) : CreateAction
+    data class ShareMeme(val picture: Picture, val imageSize: IntSize) : CreateAction
 }

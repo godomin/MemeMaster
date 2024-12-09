@@ -133,6 +133,7 @@ private fun CreateScreen(
             CapturingProgress.Capturing -> {}
             is CapturingProgress.Captured -> {
                 onAction(CreateAction.SaveMeme(progress.picture, imageSize))
+                captureState.progress = CapturingProgress.Idle
             }
 
             is CapturingProgress.Error -> {}

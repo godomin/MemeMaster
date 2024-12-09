@@ -23,26 +23,6 @@ class ImageRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ImageRepository {
 
-    override suspend fun getImageFile(name: String): File? {
-        return withContext(Dispatchers.IO) {
-            val filesDir = context.filesDir
-            filesDir.listFiles()?.find { it.name == name }
-        }
-    }
-
-    override suspend fun deleteImages(images: List<String>) {
-        withContext(Dispatchers.IO) {
-            for (image in images) {
-                try {
-                    val file = File(context.filesDir, image)
-                    file.delete()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
     override suspend fun saveImage(imageData: ImageData): String {
         val bitmap = imageData.byteArray.toBitmap()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -50,6 +30,11 @@ class ImageRepositoryImpl @Inject constructor(
         } else {
             saveImageBelow28(imageData.fileName, bitmap)
         }
+        return saveImageToInternalStorage(imageData.fileName, bitmap)
+    }
+
+    override suspend fun saveImageInternalStorage(imageData: ImageData): String {
+        val bitmap = imageData.byteArray.toBitmap()
         return saveImageToInternalStorage(imageData.fileName, bitmap)
     }
 

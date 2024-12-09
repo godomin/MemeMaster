@@ -104,6 +104,7 @@ class CreateViewModel @Inject constructor(
             CreateAction.OnRedo -> redo()
 
             is CreateAction.SaveMeme -> saveMeme(action.picture, action.imageSize)
+            is CreateAction.ShareMeme -> shareMeme(action.picture, action.imageSize)
 
             else -> Unit
         }
@@ -211,6 +212,28 @@ class CreateViewModel @Inject constructor(
                     byteArray = bitmap.toByteArray()
                 )
             )
+            upsertMeme(imageUri)
+        }
+    }
+
+    private fun shareMeme(picture: Picture, imageSize: IntSize) {
+        viewModelScope.launch {
+            val bitmap = withContext(Dispatchers.Default) {
+                picture.toBitmap(imageSize)
+            }
+            val fileName = getFileName()
+            val imageUri = imageRepository.saveImageInternalStorage(
+                ImageData(
+                    fileName = fileName,
+                    byteArray = bitmap.toByteArray()
+                )
+            )
+            upsertMeme(imageUri)
+        }
+    }
+
+    private fun upsertMeme(imageUri: String) {
+        viewModelScope.launch {
             memeRepository.upsertMeme(
                 MemeData(
                     imageUri = imageUri,

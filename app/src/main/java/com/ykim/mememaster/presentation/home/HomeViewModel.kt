@@ -6,9 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ykim.mememaster.domain.ImageRepository
 import com.ykim.mememaster.domain.MemeRepository
+import com.ykim.mememaster.domain.model.MemeData
 import com.ykim.mememaster.presentation.mapper.toMeme
+import com.ykim.mememaster.presentation.mapper.toMemeData
 import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.presentation.util.sortByFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val imageRepository: ImageRepository,
     private val memeRepository: MemeRepository,
 ) : ViewModel() {
     var state by mutableStateOf(HomeState())
@@ -69,7 +69,7 @@ class HomeViewModel @Inject constructor(
     private fun onFilterChanged(filter: DropdownList) {
         if (state.filter != filter) {
             state = state.copy(
-                list = state.list.sortByFilter(state.filter),
+                list = state.list.sortByFilter(filter),
                 filter = filter
             )
         }
@@ -91,9 +91,18 @@ class HomeViewModel @Inject constructor(
                 } else {
                     it
                 }
-            }
+            }.sortByFilter(state.filter)
         )
-        // TODO: update to repo
+        viewModelScope.launch {
+            memeRepository.upsertMeme(
+                MemeData(
+                    imageUri = newItem.imageUri.toString(),
+                    isFavorite = newItem.isFavorite,
+                    isSelected = newItem.isSelected,
+                    timestamp = newItem.timestamp
+                )
+            )
+        }
     }
 
     private fun onItemSelected(item: Meme, forceSelect: Boolean = false) {
@@ -115,10 +124,13 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun deleteSelectedItems() {
+        val (deleted, left) = state.list.partition { it.isSelected }
         state = state.copy(
-            list = state.list.filter { !it.isSelected }
+            list = left
         )
-        // TODO: update to repo
+        viewModelScope.launch {
+            memeRepository.deleteMemes(deleted.map { it.toMemeData() })
+        }
     }
 
     private fun shareSelectedItems() {

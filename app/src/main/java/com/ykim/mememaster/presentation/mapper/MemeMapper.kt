@@ -13,9 +13,9 @@ fun MemeData.toMeme(): Meme {
     )
 }
 
-fun Meme.toMemeData(fileName: String): MemeData {
+fun Meme.toMemeData(): MemeData {
     return MemeData(
-        imageUri = fileName,
+        imageUri = imageUri.toString(),
         isFavorite = isFavorite,
         isSelected = isSelected,
         timestamp = timestamp
