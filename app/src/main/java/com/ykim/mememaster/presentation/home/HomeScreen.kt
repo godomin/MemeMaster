@@ -1,5 +1,6 @@
 package com.ykim.mememaster.presentation.home
 
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -54,7 +55,7 @@ import com.ykim.mememaster.presentation.components.MemeIcon
 import com.ykim.mememaster.presentation.components.MemeSearchField
 import com.ykim.mememaster.presentation.components.MemeSquareItem
 import com.ykim.mememaster.presentation.components.MemeSquareItemExtended
-import com.ykim.mememaster.domain.model.MemeData
+import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.presentation.util.getGradientBrush
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
@@ -193,7 +194,7 @@ private fun HomeScreen(
                         ) {
                             items(
                                 items = state.list,
-                                key = { it.fileName }
+                                key = { it.timestamp }
                             ) { item ->
                                 MemeSquareItemExtended(
                                     item = item,
@@ -326,20 +327,20 @@ private fun HomeScreenPreview() {
         HomeScreen(
             state = HomeState(
                 list = listOf(
-                    MemeData(
-                        fileName = "1",
+                    Meme(
+                        imageUri = Uri.parse("1"),
                         isFavorite = true,
                         isSelected = true,
                         timestamp = 0L
                     ),
-                    MemeData(
-                        fileName = "2",
+                    Meme(
+                        imageUri = Uri.parse("2"),
                         isFavorite = false,
                         isSelected = false,
                         timestamp = 0L
                     ),
-                    MemeData(
-                        fileName = "3",
+                    Meme(
+                        imageUri = Uri.parse("3"),
                         isFavorite = false,
                         isSelected = false,
                         timestamp = 0L

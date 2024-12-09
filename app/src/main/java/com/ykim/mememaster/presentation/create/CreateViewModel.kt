@@ -1,6 +1,7 @@
 package com.ykim.mememaster.presentation.create
 
 import android.content.Context
+import android.graphics.Picture
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,10 +13,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.ykim.mememaster.data.BitmapMapper
+import com.ykim.mememaster.data.mapper.toByteArray
 import com.ykim.mememaster.domain.HistoryManager
 import com.ykim.mememaster.domain.ImageRepository
+import com.ykim.mememaster.domain.MemeRepository
 import com.ykim.mememaster.domain.model.ImageData
+import com.ykim.mememaster.domain.model.MemeData
 import com.ykim.mememaster.presentation.model.EditMode
 import com.ykim.mememaster.presentation.model.OverlayText
 import com.ykim.mememaster.presentation.navigation.Create
@@ -38,6 +41,7 @@ class CreateViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val historyManager: HistoryManager<List<OverlayText>>,
     private val imageRepository: ImageRepository,
+    private val memeRepository: MemeRepository,
 ) : ViewModel() {
     var state by mutableStateOf(CreateState())
         private set
@@ -99,19 +103,7 @@ class CreateViewModel @Inject constructor(
             CreateAction.OnUndo -> undo()
             CreateAction.OnRedo -> redo()
 
-            is CreateAction.SaveMeme -> {
-                viewModelScope.launch {
-                    val bitmap = withContext(Dispatchers.Default) {
-                        action.picture.toBitmap(action.imageSize)
-                    }
-                    imageRepository.saveImage(
-                        ImageData(
-                            fileName = getFileName(),
-                            byteArray = BitmapMapper.bitmapToArray(bitmap)
-                        )
-                    )
-                }
-            }
+            is CreateAction.SaveMeme -> saveMeme(action.picture, action.imageSize)
 
             else -> Unit
         }
@@ -205,6 +197,29 @@ class CreateViewModel @Inject constructor(
         state = state.copy(
             textList = list
         )
+    }
+
+    private fun saveMeme(picture: Picture, imageSize: IntSize) {
+        viewModelScope.launch {
+            val bitmap = withContext(Dispatchers.Default) {
+                picture.toBitmap(imageSize)
+            }
+            val fileName = getFileName()
+            val imageUri = imageRepository.saveImage(
+                ImageData(
+                    fileName = fileName,
+                    byteArray = bitmap.toByteArray()
+                )
+            )
+            memeRepository.upsertMeme(
+                MemeData(
+                    imageUri = imageUri,
+                    isFavorite = false,
+                    isSelected = false,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
+        }
     }
 
     private fun getFileName(): String {

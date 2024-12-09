@@ -1,14 +1,15 @@
 package com.ykim.mememaster.presentation.home
 
 import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ykim.mememaster.domain.ImageRepository
-import com.ykim.mememaster.domain.model.MemeData
+import com.ykim.mememaster.domain.MemeRepository
+import com.ykim.mememaster.presentation.mapper.toMeme
+import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.presentation.util.sortByFilter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val imageRepository: ImageRepository,
+    private val memeRepository: MemeRepository,
 ) : ViewModel() {
     var state by mutableStateOf(HomeState())
         private set
@@ -29,20 +31,12 @@ class HomeViewModel @Inject constructor(
     val events = eventChannel.receiveAsFlow()
 
     init {
-        // TODO: load from repo
-        val list = mutableListOf<MemeData>()
-        (0..9).forEach {
-            list += MemeData(
-                fileName = "$it",
-                isFavorite = false,
-                isSelected = false,
-                timestamp = 0L
+        viewModelScope.launch {
+            state = state.copy(
+                list = memeRepository.getMemes().map { it.toMeme() }.sortByFilter(state.filter),
+                resultList = getSearchResult(state.searchQuery)
             )
         }
-        state = state.copy(
-            list = list.sortByFilter(state.filter),
-            resultList = getSearchResult(state.searchQuery)
-        )
     }
 
     fun onAction(action: HomeAction) {
@@ -88,11 +82,11 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    private fun onFavoriteToggled(item: MemeData) {
+    private fun onFavoriteToggled(item: Meme) {
         val newItem = item.copy(isFavorite = !item.isFavorite)
         state = state.copy(
             list = state.list.map {
-                if (it.fileName == item.fileName) {
+                if (it.timestamp == item.timestamp) {
                     newItem
                 } else {
                     it
@@ -102,11 +96,11 @@ class HomeViewModel @Inject constructor(
         // TODO: update to repo
     }
 
-    private fun onItemSelected(item: MemeData, forceSelect: Boolean = false) {
+    private fun onItemSelected(item: Meme, forceSelect: Boolean = false) {
         val newItem = item.copy(isSelected = !item.isSelected || forceSelect)
         state = state.copy(
             list = state.list.map {
-                if (it.fileName == item.fileName) {
+                if (it.timestamp == item.timestamp) {
                     newItem
                 } else {
                     it
@@ -115,7 +109,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    private fun onItemLongPressed(item: MemeData) {
+    private fun onItemLongPressed(item: Meme) {
         onItemSelected(item, true)
         state = state.copy(mode = ItemMode.SELECT)
     }
@@ -128,7 +122,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun shareSelectedItems() {
-        val uriList = state.list.filter { it.isSelected }.map { Uri.parse(it.fileName) }
+        val uriList = state.list.filter { it.isSelected }.map { it.imageUri }
         viewModelScope.launch {
             eventChannel.send(HomeEvent.StartShareChooser(ArrayList(uriList)))
         }
