@@ -84,6 +84,7 @@ class CreateViewModel @Inject constructor(
                     selectedText = action.text,
                     editMode = EditMode.NONE
                 )
+                rearrangeTextList(action.text)
             }
 
             CreateAction.OnRemoveText -> {
@@ -137,6 +138,12 @@ class CreateViewModel @Inject constructor(
         val coercedX = newOffset.x.coerceIn(left, right)
         val coercedY = newOffset.y.coerceIn(top, bottom)
         return Offset(coercedX, coercedY)
+    }
+
+    private fun rearrangeTextList(text: OverlayText) {
+        state = state.copy(
+            textList = state.textList.filter { it.id!= text.id } + text
+        )
     }
 
     private fun stateToAddMode() {
