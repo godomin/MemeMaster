@@ -128,7 +128,8 @@ class HomeViewModel @Inject constructor(
     private fun deleteSelectedItems() {
         val (deleted, left) = state.list.partition { it.isSelected }
         state = state.copy(
-            list = left
+            list = left,
+            mode = ItemMode.FAVORITE
         )
         viewModelScope.launch {
             memeRepository.deleteMemes(deleted.map { it.toMemeData() })

@@ -2,6 +2,7 @@ package com.ykim.mememaster.presentation.home
 
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -115,6 +116,9 @@ private fun HomeScreen(
     }
     var showDeleteConfirmDialog by remember {
         mutableStateOf(false)
+    }
+    BackHandler(state.mode == ItemMode.SELECT) {
+        onAction(HomeAction.OnCancelSelect)
     }
     Scaffold(
         floatingActionButton = {
