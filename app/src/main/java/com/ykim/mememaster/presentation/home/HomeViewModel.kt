@@ -30,17 +30,10 @@ class HomeViewModel @Inject constructor(
     private val eventChannel = Channel<HomeEvent>()
     val events = eventChannel.receiveAsFlow()
 
-    init {
-        viewModelScope.launch {
-            state = state.copy(
-                list = memeRepository.getMemes().map { it.toMeme() }.sortByFilter(state.filter),
-                resultList = getSearchResult(state.searchQuery)
-            )
-        }
-    }
-
     fun onAction(action: HomeAction) {
         when (action) {
+            HomeAction.LoadData -> loadData()
+
             is HomeAction.OnFilterChanged -> onFilterChanged(action.filter)
 
             HomeAction.OnCancelSelect -> onCancelSelected()
@@ -63,6 +56,15 @@ class HomeViewModel @Inject constructor(
             }
 
             else -> Unit
+        }
+    }
+
+    private fun loadData() {
+        viewModelScope.launch {
+            state = state.copy(
+                list = memeRepository.getMemes().map { it.toMeme() }.sortByFilter(state.filter),
+                resultList = getSearchResult(state.searchQuery)
+            )
         }
     }
 

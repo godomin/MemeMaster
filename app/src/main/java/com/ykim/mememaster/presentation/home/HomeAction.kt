@@ -3,6 +3,7 @@ package com.ykim.mememaster.presentation.home
 import com.ykim.mememaster.presentation.model.Meme
 
 sealed interface HomeAction {
+    data object LoadData : HomeAction
     data class OnFilterChanged(val filter: DropdownList) : HomeAction
     data class OnItemIconClicked(val item: Meme) : HomeAction
     data class OnItemLongPressed(val item: Meme) : HomeAction
