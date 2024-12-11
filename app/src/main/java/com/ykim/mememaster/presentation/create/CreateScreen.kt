@@ -87,6 +87,8 @@ import com.ykim.mememaster.presentation.util.getTextComposable
 import com.ykim.mememaster.presentation.util.pxToDp
 import com.ykim.mememaster.presentation.util.rememberCaptureState
 import com.ykim.mememaster.presentation.util.rememberKeyboardVisibility
+import com.ykim.mememaster.presentation.util.shareMeme
+import com.ykim.mememaster.ui.ObserveAsEvents
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 import com.ykim.mememaster.ui.theme.SurfaceContainerHighDark
 
@@ -95,6 +97,14 @@ fun CreateScreenRoot(
     onNavigateUp: () -> Unit,
     viewModel: CreateViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is CreateEvent.StartShareChooser -> {
+                context.shareMeme(listOf(event.uri))
+            }
+        }
+    }
     CreateScreen(
         state = viewModel.state,
         onAction = { action ->
@@ -130,9 +140,13 @@ private fun CreateScreen(
     LaunchedEffect(key1 = captureState.progress) {
         when (val progress = captureState.progress) {
             CapturingProgress.Idle -> {}
-            CapturingProgress.Capturing -> {}
+            is CapturingProgress.Capturing -> {}
             is CapturingProgress.Captured -> {
-                onAction(CreateAction.SaveMeme(progress.picture, imageSize))
+                if (progress.isInternal) {
+                    onAction(CreateAction.ShareMeme(progress.picture, imageSize))
+                } else {
+                    onAction(CreateAction.SaveMeme(progress.picture, imageSize))
+                }
                 captureState.progress = CapturingProgress.Idle
             }
 
@@ -563,6 +577,7 @@ private fun CreateScreen(
                             title = stringResource(id = R.string.share_meme_title),
                             description = stringResource(id = R.string.share_meme_description),
                             onClick = {
+                                captureState.captureInternal()
                                 showSaveBottomSheet = false
                             }
                         )

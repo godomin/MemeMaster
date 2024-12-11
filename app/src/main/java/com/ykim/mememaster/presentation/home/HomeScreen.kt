@@ -57,13 +57,23 @@ import com.ykim.mememaster.presentation.components.MemeSquareItem
 import com.ykim.mememaster.presentation.components.MemeSquareItemExtended
 import com.ykim.mememaster.presentation.model.Meme
 import com.ykim.mememaster.presentation.util.getGradientBrush
+import com.ykim.mememaster.presentation.util.shareMeme
+import com.ykim.mememaster.ui.ObserveAsEvents
 import com.ykim.mememaster.ui.theme.MemeMasterTheme
 
 @Composable
 fun HomeScreenRoot(
     onTemplateSelected: (Int) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    ObserveAsEvents(viewModel.events) { event ->
+        when (event) {
+            is HomeEvent.StartShareChooser -> {
+                context.shareMeme(event.uriList)
+            }
+        }
+    }
     HomeScreen(
         state = viewModel.state,
         onAction = { action ->

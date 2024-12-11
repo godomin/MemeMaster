@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.IntSize
 
 sealed class CapturingProgress {
     data object Idle : CapturingProgress()
-    data object Capturing : CapturingProgress()
-    data class Captured(val picture: Picture) : CapturingProgress()
+    data class Capturing(val isInternal: Boolean) : CapturingProgress()
+    data class Captured(val picture: Picture, val isInternal: Boolean) : CapturingProgress()
     data class Error(val exception: Throwable) : CapturingProgress()
 }
 
@@ -27,6 +27,8 @@ interface CaptureState {
     var progress: CapturingProgress
 
     fun capture()
+
+    fun captureInternal()
 }
 
 class CaptureStateImpl : CaptureState {
@@ -34,7 +36,11 @@ class CaptureStateImpl : CaptureState {
     override var progress: CapturingProgress by mutableStateOf(CapturingProgress.Idle)
 
     override fun capture() {
-        progress = CapturingProgress.Capturing
+        progress = CapturingProgress.Capturing(isInternal = false)
+    }
+
+    override fun captureInternal() {
+        progress = CapturingProgress.Capturing(isInternal = true)
     }
 }
 
@@ -44,7 +50,9 @@ fun rememberCaptureState(): CaptureState {
 }
 
 fun Modifier.capture(state: CaptureState): Modifier {
-    return this.applyIf(state.progress == CapturingProgress.Capturing, {
+    return this.applyIf(state.progress is CapturingProgress.Capturing, {
+        val isInternal =
+            state.progress is CapturingProgress.Capturing && (state.progress as CapturingProgress.Capturing).isInternal
         try {
             drawWithCache {
                 val width = this.size.width.toInt()
@@ -60,7 +68,7 @@ fun Modifier.capture(state: CaptureState): Modifier {
                     picture.endRecording()
 
                     drawIntoCanvas { canvas -> canvas.nativeCanvas.drawPicture(picture) }
-                    state.progress = CapturingProgress.Captured(picture)
+                    state.progress = CapturingProgress.Captured(picture, isInternal)
                 }
             }
         } catch (e: Exception) {

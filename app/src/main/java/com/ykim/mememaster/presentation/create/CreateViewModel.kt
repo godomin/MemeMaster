@@ -2,6 +2,7 @@ package com.ykim.mememaster.presentation.create
 
 import android.content.Context
 import android.graphics.Picture
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -28,6 +29,8 @@ import com.ykim.mememaster.presentation.util.toBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -43,8 +46,13 @@ class CreateViewModel @Inject constructor(
     private val imageRepository: ImageRepository,
     private val memeRepository: MemeRepository,
 ) : ViewModel() {
+
     var state by mutableStateOf(CreateState())
         private set
+
+    private val eventChannel = Channel<CreateEvent>()
+    val events = eventChannel.receiveAsFlow()
+
 
     init {
         val templateResId = savedStateHandle.toRoute<Create>().templateResId
@@ -229,6 +237,7 @@ class CreateViewModel @Inject constructor(
                 )
             )
             upsertMeme(imageUri)
+            eventChannel.send(CreateEvent.StartShareChooser(Uri.parse(imageUri)))
         }
     }
 
